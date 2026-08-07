@@ -59,7 +59,7 @@ export default function MapPage() {
       </div>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[1fr_320px]">
-        <div className="hud-panel corner-cut hud-grid scanline relative overflow-x-auto">
+        <div data-testid="world-map-canvas" className="hud-panel corner-cut hud-grid scanline relative overflow-x-auto">
           <div className="relative h-[620px] min-w-[1100px]">
             <svg className="absolute inset-0 h-full w-full" aria-hidden="true">
               {worldPaths.map(([a, b]) => {
@@ -130,7 +130,12 @@ export default function MapPage() {
             ].map((r) => (
               <div key={r.k} className="flex items-baseline justify-between gap-3">
                 <span className="label-mono">{r.k}</span>
-                <span className="font-display text-sm text-foreground capitalize">{r.v}</span>
+                <span
+                  data-testid={r.k === "Status" ? "world-status" : undefined}
+                  className="font-display text-sm text-foreground capitalize"
+                >
+                  {r.v}
+                </span>
               </div>
             ))}
           </div>
