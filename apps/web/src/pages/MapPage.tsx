@@ -1,29 +1,60 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Lock, Skull, Play } from "lucide-react";
-import { WORLDS, WORLD_PATHS, type World } from "@/lib/game-data";
+import { fetchWorlds, type World } from "@/lib/api";
 import { WorldNode } from "@/components/guardians/WorldNode";
 import { ThreatLevelPill } from "@/components/guardians/ThreatLevelPill";
 import { XPBar } from "@/components/guardians/XPBar";
 
-const byId = Object.fromEntries(WORLDS.map((w) => [w.id, w]));
-
 export default function MapPage() {
-  const [selected, setSelected] = useState<World>(byId["windows"]!);
-  const cleared = WORLDS.filter((w) => w.state === "cleared").length;
+  const { data: worlds, isLoading, error } = useQuery({
+    queryKey: ["worlds"],
+    queryFn: fetchWorlds,
+  });
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (worlds && selectedId === null) {
+      const initial = worlds.find((w) => w.state !== "locked") ?? worlds[0];
+      setSelectedId(initial?.id ?? null);
+    }
+  }, [worlds, selectedId]);
+
+  if (isLoading) {
+    return (
+      <div className="px-5 py-8">
+        <span className="label-mono flicker">Establishing uplink to the grid…</span>
+      </div>
+    );
+  }
+
+  if (error || !worlds || worlds.length === 0) {
+    return (
+      <div className="px-5 py-8">
+        <span className="label-mono text-threat">Failed to load the campaign map.</span>
+      </div>
+    );
+  }
+
+  const byId = Object.fromEntries(worlds.map((w) => [w.id, w]));
+  const worldPaths: [string, string][] = worlds.slice(0, -1).map((w, i) => [w.id, worlds[i + 1]!.id]);
+  const selected = byId[selectedId ?? ""] ?? worlds[0]!;
+  const cleared = worlds.filter((w) => w.state === "cleared").length;
 
   return (
     <div className="px-5 py-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <span className="label-mono text-primary">Sector chart · 20 worlds</span>
+          <span className="label-mono text-primary">Sector chart · {worlds.length} worlds</span>
           <h1 className="mt-2 text-3xl font-bold text-foreground sm:text-4xl">The Grid</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Every world is a live front. Clear a node to open the routes beyond it.
           </p>
         </div>
         <div className="hud-panel corner-cut w-64 p-4">
-          <XPBar value={cleared} max={WORLDS.length} label="Worlds secured" />
+          <XPBar value={cleared} max={worlds.length} label="Worlds secured" />
         </div>
       </div>
 
@@ -31,7 +62,7 @@ export default function MapPage() {
         <div className="hud-panel corner-cut hud-grid scanline relative overflow-x-auto">
           <div className="relative h-[620px] min-w-[1100px]">
             <svg className="absolute inset-0 h-full w-full" aria-hidden="true">
-              {WORLD_PATHS.map(([a, b]) => {
+              {worldPaths.map(([a, b]) => {
                 const wa = byId[a]!;
                 const wb = byId[b]!;
                 const locked = wb.state === "locked";
@@ -51,13 +82,13 @@ export default function MapPage() {
               })}
             </svg>
 
-            {WORLDS.map((w) => (
+            {worlds.map((w) => (
               <div
                 key={w.id}
                 className="absolute -translate-x-1/2 -translate-y-1/2"
                 style={{ left: `${w.x}%`, top: `${w.y}%` }}
               >
-                <WorldNode world={w} selected={selected.id === w.id} onSelect={setSelected} />
+                <WorldNode world={w} selected={selected.id === w.id} onSelect={(w) => setSelectedId(w.id)} />
               </div>
             ))}
           </div>
@@ -69,7 +100,7 @@ export default function MapPage() {
               <selected.icon className="h-6 w-6" />
             </span>
             <div>
-              <div className="label-mono">World {WORLDS.indexOf(selected) + 1} / 20</div>
+              <div className="label-mono">World {worlds.indexOf(selected) + 1} / {worlds.length}</div>
               <h2 className="font-display text-lg leading-tight text-foreground">
                 {selected.name}
               </h2>

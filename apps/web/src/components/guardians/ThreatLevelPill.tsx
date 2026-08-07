@@ -1,4 +1,4 @@
-import type { ThreatLevel } from "@/lib/game-data";
+import type { ThreatLevel } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export type ThreatLevelPillProps = {

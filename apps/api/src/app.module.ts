@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { HealthModule } from "./health/health.module";
 import { PlayersModule } from "./players/players.module";
+import { WorldsModule } from "./worlds/worlds.module";
 
 /**
  * Modular monolith (section 25). Domain modules are added here as they're
@@ -9,6 +10,6 @@ import { PlayersModule } from "./players/players.module";
  * Notifications, Admin, Analytics.
  */
 @Module({
-  imports: [HealthModule, PlayersModule],
+  imports: [HealthModule, PlayersModule, WorldsModule],
 })
 export class AppModule {}
