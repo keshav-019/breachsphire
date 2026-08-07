@@ -1,0 +1,31 @@
+{
+  "name": "cyber-guardians",
+  "private": true,
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.34.5",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "dev:web": "pnpm --filter @cyber-guardians/web dev",
+    "dev:api": "pnpm --filter @cyber-guardians/api dev",
+    "db:start": "supabase start --workdir infra",
+    "db:stop": "supabase stop --workdir infra",
+    "db:status": "supabase status --workdir infra"
+  },
+  "devDependencies": {
+    "supabase": "^2.112.0",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "esbuild"
+    ]
+  }
+}

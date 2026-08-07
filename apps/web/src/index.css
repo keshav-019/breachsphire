@@ -1,0 +1,237 @@
+@import "tailwindcss" source(none);
+@source ".";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * CYBER GUARDIANS design system.
+ * Dark ops-center aesthetic: deep void navy, amber signal, teal telemetry.
+ * All colors in oklch. Never hardcode colors in components.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-signal: var(--signal);
+  --color-signal-foreground: var(--signal-foreground);
+  --color-telemetry: var(--telemetry);
+  --color-threat: var(--threat);
+  --color-clearance: var(--clearance);
+  --color-grid: var(--grid);
+  --font-display: "Chakra Petch", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+:root {
+  --radius: 0.25rem;
+
+  --background: oklch(0.16 0.028 258);
+  --foreground: oklch(0.94 0.012 240);
+
+  --surface: oklch(0.2 0.03 258);
+  --surface-raised: oklch(0.24 0.032 258);
+
+  --card: oklch(0.2 0.03 258);
+  --card-foreground: oklch(0.94 0.012 240);
+  --popover: oklch(0.2 0.03 258);
+  --popover-foreground: oklch(0.94 0.012 240);
+
+  /* Amber signal — mission critical */
+  --primary: oklch(0.78 0.16 68);
+  --primary-foreground: oklch(0.18 0.03 258);
+  --signal: oklch(0.78 0.16 68);
+  --signal-foreground: oklch(0.18 0.03 258);
+
+  /* Teal telemetry — systems nominal */
+  --secondary: oklch(0.28 0.045 220);
+  --secondary-foreground: oklch(0.92 0.02 200);
+  --telemetry: oklch(0.78 0.13 190);
+  --accent: oklch(0.78 0.13 190);
+  --accent-foreground: oklch(0.18 0.03 258);
+
+  --muted: oklch(0.26 0.028 258);
+  --muted-foreground: oklch(0.68 0.024 245);
+
+  --threat: oklch(0.66 0.21 22);
+  --destructive: oklch(0.66 0.21 22);
+  --destructive-foreground: oklch(0.97 0.01 240);
+  --clearance: oklch(0.72 0.16 300);
+
+  --border: oklch(0.32 0.035 250);
+  --input: oklch(0.3 0.035 250);
+  --ring: oklch(0.78 0.16 68);
+  --grid: oklch(0.78 0.13 190 / 8%);
+
+  --gradient-void: radial-gradient(
+    120% 80% at 50% 0%,
+    oklch(0.26 0.05 232) 0%,
+    oklch(0.16 0.028 258) 60%
+  );
+  --gradient-signal: linear-gradient(
+    100deg,
+    oklch(0.82 0.15 82),
+    oklch(0.72 0.17 48)
+  );
+  --gradient-telemetry: linear-gradient(
+    100deg,
+    oklch(0.78 0.13 190),
+    oklch(0.66 0.14 232)
+  );
+  --shadow-hud: 0 18px 50px -24px oklch(0.05 0.02 258 / 90%);
+  --glow-signal: 0 0 0 1px oklch(0.78 0.16 68 / 35%), 0 0 28px -6px oklch(0.78 0.16 68 / 45%);
+  --glow-telemetry: 0 0 0 1px oklch(0.78 0.13 190 / 35%), 0 0 26px -8px oklch(0.78 0.13 190 / 45%);
+}
+
+.dark {
+  --background: oklch(0.16 0.028 258);
+  --foreground: oklch(0.94 0.012 240);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--color-background);
+    background-image: var(--gradient-void);
+    background-attachment: fixed;
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+}
+
+@utility hud-grid {
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+@utility hud-panel {
+  position: relative;
+  background: color-mix(in oklab, var(--surface) 78%, transparent);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-hud);
+  backdrop-filter: blur(6px);
+}
+
+@utility corner-cut {
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+}
+
+@utility label-mono {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+@utility glow-signal {
+  box-shadow: var(--glow-signal);
+}
+
+@utility glow-telemetry {
+  box-shadow: var(--glow-telemetry);
+}
+
+@utility scanline {
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0 3px,
+      oklch(0 0 0 / 12%) 3px 4px
+    );
+    mix-blend-mode: overlay;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 oklch(0.78 0.16 68 / 45%);
+  }
+  70% {
+    box-shadow: 0 0 0 14px oklch(0.78 0.16 68 / 0%);
+  }
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.78 0.16 68 / 0%);
+  }
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(200%);
+  }
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@utility pulse-ring {
+  animation: pulse-ring 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@utility sweep-line {
+  animation: sweep 3.5s linear infinite;
+}
+
+@utility flicker {
+  animation: flicker 2.6s ease-in-out infinite;
+}
