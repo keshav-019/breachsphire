@@ -1,73 +1,18 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
-  Binary,
-  Bot,
-  Brain,
   Bug,
-  Building2,
   Cloud,
   Crosshair,
   Fingerprint,
-  Globe,
-  GraduationCap,
   KeyRound,
   Network,
-  Radar,
   Search,
-  Server,
   ShieldAlert,
   Skull,
   Terminal,
-  TrendingUp,
+  Brain,
 } from "lucide-react";
-
-export type WorldState = "cleared" | "active" | "unlocked" | "locked";
-
-export type World = {
-  id: string;
-  name: string;
-  short: string;
-  icon: LucideIcon;
-  state: WorldState;
-  completion: number;
-  boss?: string;
-  threat: ThreatLevel;
-  /** position on the campaign map, in % of the map canvas */
-  x: number;
-  y: number;
-};
-
-export type ThreatLevel = "low" | "guarded" | "elevated" | "severe" | "critical";
-
-export const WORLDS: World[] = [
-  { id: "academy", name: "Cyber Guardian Academy", short: "Academy", icon: GraduationCap, state: "cleared", completion: 100, threat: "low", x: 6, y: 78 },
-  { id: "fundamentals", name: "Computer Fundamentals", short: "Fundamentals", icon: Binary, state: "cleared", completion: 100, threat: "low", x: 15, y: 52 },
-  { id: "networking", name: "Networking Kingdom", short: "Networking", icon: Network, state: "cleared", completion: 100, boss: "The Packet Tyrant", threat: "guarded", x: 24, y: 76 },
-  { id: "linux", name: "Linux Citadel", short: "Linux", icon: Terminal, state: "cleared", completion: 92, threat: "guarded", x: 32, y: 44 },
-  { id: "windows", name: "Windows Fortress", short: "Windows", icon: Building2, state: "active", completion: 61, threat: "elevated", x: 41, y: 70 },
-  { id: "programming", name: "Programming", short: "Programming", icon: Bot, state: "unlocked", completion: 34, threat: "guarded", x: 49, y: 40 },
-  { id: "osint", name: "Recon & OSINT", short: "Recon", icon: Search, state: "unlocked", completion: 18, threat: "guarded", x: 58, y: 66 },
-  { id: "websec", name: "Web Security Metropolis", short: "Web Sec", icon: Globe, state: "unlocked", completion: 7, boss: "SQL Leviathan", threat: "elevated", x: 67, y: 34 },
-  { id: "pentest", name: "Penetration Testing", short: "Pentest", icon: Crosshair, state: "locked", completion: 0, threat: "elevated", x: 76, y: 62 },
-  { id: "privesc", name: "Privilege Escalation", short: "PrivEsc", icon: TrendingUp, state: "locked", completion: 0, threat: "elevated", x: 85, y: 30 },
-  { id: "ad", name: "Active Directory Empire", short: "AD Empire", icon: Server, state: "locked", completion: 0, boss: "Domain Overlord", threat: "severe", x: 93, y: 58 },
-  { id: "soc", name: "SOC Command Center", short: "SOC", icon: Radar, state: "locked", completion: 0, threat: "elevated", x: 10, y: 22 },
-  { id: "ir", name: "Incident Response", short: "IR", icon: ShieldAlert, state: "locked", completion: 0, threat: "severe", x: 21, y: 12 },
-  { id: "forensics", name: "Digital Forensics", short: "Forensics", icon: Fingerprint, state: "locked", completion: 0, threat: "severe", x: 34, y: 18 },
-  { id: "malware", name: "Malware Analysis & RE", short: "Malware RE", icon: Bug, state: "locked", completion: 0, boss: "HOLLOW TIDE", threat: "critical", x: 46, y: 10 },
-  { id: "cloud", name: "Cloud Security & DevSecOps", short: "Cloud", icon: Cloud, state: "locked", completion: 0, threat: "severe", x: 58, y: 18 },
-  { id: "crypto", name: "Cryptography", short: "Crypto", icon: KeyRound, state: "locked", completion: 0, threat: "severe", x: 70, y: 8 },
-  { id: "redteam", name: "Advanced Red Team", short: "Red Team", icon: Skull, state: "locked", completion: 0, boss: "The Shadow Cell", threat: "critical", x: 80, y: 16 },
-  { id: "hunting", name: "Threat Hunting", short: "Hunting", icon: Activity, state: "locked", completion: 0, threat: "critical", x: 90, y: 8 },
-  { id: "aisec", name: "AI Security", short: "AI Sec", icon: Brain, state: "locked", completion: 0, boss: "ORACLE-9", threat: "critical", x: 97, y: 22 },
-];
-
-/** Ordered pairs of world ids that are connected on the campaign map. */
-export const WORLD_PATHS: [string, string][] = WORLDS.slice(0, -1).map((w, i) => [
-  w.id,
-  WORLDS[i + 1]!.id,
-]);
 
 export type SkillTrack = { name: string; level: number; max: number; pct: number };
 
