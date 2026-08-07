@@ -14,11 +14,12 @@ for v1. NestJS as a **modular monolith**, not microservices, during the MVP.
 | API | NestJS + TypeScript |
 | Database | PostgreSQL |
 | Initial DB/Auth | Supabase (email/password, Google OAuth, GitHub OAuth) |
-| ORM | Prisma or Drizzle |
+| ORM | Drizzle (decided — see `apps/api/src/db`) |
 | Validation | Zod |
 | Client state | Zustand |
 | Data fetching | TanStack Query |
 | Terminal UI | xterm.js |
+| E2E testing | Playwright (`apps/web/e2e`) — runs against real dev servers and the real Supabase project, no mocks |
 | Monorepo tooling | pnpm workspaces + Turborepo |
 | Object storage | Cloudflare R2 (character/mission art, audio, PCAPs, forensics files — never large binaries in Postgres) |
 | Containers | Docker (Type C labs — see [Lab System](./05-lab-system.md)) |
