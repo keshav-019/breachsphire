@@ -34,6 +34,25 @@ pnpm dev
 
 Or run one side at a time: `pnpm dev:web` / `pnpm dev:api`.
 
+## Testing
+
+`apps/web` has a Playwright e2e suite that runs against the real dev servers
+and the real Supabase project (no mocks) — auth (login/logout/session
+persistence/protected routes), signup, and the World Map's live data.
+
+It logs in as a **persistent test account** rather than creating a throwaway
+user per run: copy `apps/web/.env.test.example` to `apps/web/.env.test` and
+fill in that account's credentials (ask a teammate, or sign up your own test
+account and use it — its World Map state is expected to stay untouched,
+since nothing yet writes to `player_world_progress` after signup).
+
+```bash
+pnpm dev                      # dev servers must be running (or let Playwright start them)
+cd apps/web
+pnpm test:e2e                 # headless
+pnpm test:e2e:ui              # interactive UI mode
+```
+
 ## Status
 
 Phase 1 is mostly in place: monorepo, shared mission/player type schema, the

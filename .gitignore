@@ -6,9 +6,14 @@ build/
 .env
 .env.*
 !.env.example
+!.env.test.example
 *.log
 .DS_Store
 .vite/
 coverage/
 .vscode/*
 !.vscode/extensions.json
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
