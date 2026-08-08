@@ -1,10 +1,16 @@
 # Progression, Ranks & Skills
 
-## Ranks
+## Ranks (clearance)
 
-Recruit -> Trainee -> Cyber Cadet -> Cyber Defender -> Security Analyst ->
-Incident Responder -> Pentester -> Threat Hunter -> Red Team Specialist ->
-Blue Team Commander -> Cyber Guardian -> Elite Guardian.
+Civilian -> Recruit -> Cadet -> Analyst -> Operator -> Pentester -> Hunter
+-> Specialist -> Commander -> Elite Guardian.
+
+This is the clearance progression from the
+[World Story & Campaign Bible](./12-world-story-bible.md#21-clearance-progression)
+— a story wrapper around prerequisite mastery, not a separate XP-tier
+system. New operational privileges (real Docker labs, advanced AD ranges,
+exploit research, command simulations) unlock only after the required
+skills and safety briefings for that clearance level are complete.
 
 Encoded as `PLAYER_RANKS` in `packages/types/src/rank.ts`.
 

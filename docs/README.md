@@ -7,7 +7,7 @@ the implementation does.
 
 1. [Overview & Product Principle](./00-overview.md)
 2. [Game Structure & Worlds](./01-game-structure-worlds.md)
-3. [Story, Characters & Seasons](./02-story-characters-seasons.md)
+3. [Story, Characters & Acts](./02-story-characters-seasons.md)
 4. [Progression, Ranks & Skills](./03-progression-ranks-skills.md)
 5. [Mission Content Engine](./04-mission-content-engine.md)
 6. [Lab System](./05-lab-system.md)
@@ -16,3 +16,5 @@ the implementation does.
 9. [Repo Structure](./08-repo-structure.md)
 10. [Development Phases & MVP Scope](./09-development-phases.md)
 11. [Business Model](./10-business-model.md)
+12. [Story Generation Prompt](./11-story-generation-prompt.md) — superseded, see 13
+13. [World Story & Campaign Bible](./12-world-story-bible.md)

@@ -1,22 +1,31 @@
 import { useState } from "react";
-import { ChevronDown, Lightbulb } from "lucide-react";
+import { ChevronDown, Lightbulb, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type Hint = {
-  id: string;
-  title: string;
-  body: string;
-  cost: number;
+  tier: string;
+  xpCost: number;
+  revealed: boolean;
+  text: string | null;
 };
 
 export type HintPanelProps = {
   hints: Hint[];
+  onReveal?: (tier: string) => void;
+  revealing?: boolean;
   className?: string;
 };
 
-export function HintPanel({ hints, className }: HintPanelProps) {
-  const [openId, setOpenId] = useState<string | null>(null);
-  const [revealed, setRevealed] = useState<string[]>([]);
+const TIER_LABEL: Record<string, string> = {
+  orientation: "Orientation",
+  concept: "Concept",
+  tool_direction: "Tool direction",
+  near_solution: "Near solution",
+  solution: "Solution",
+};
+
+export function HintPanel({ hints, onReveal, revealing, className }: HintPanelProps) {
+  const [openTier, setOpenTier] = useState<string | null>(null);
 
   return (
     <div className={cn("hud-panel corner-cut p-4", className)}>
@@ -27,31 +36,45 @@ export function HintPanel({ hints, className }: HintPanelProps) {
       </div>
 
       <ul className="mt-3 space-y-2">
-        {hints.map((h) => {
-          const open = openId === h.id;
-          const isRevealed = revealed.includes(h.id);
+        {hints.map((h, i) => {
+          const open = openTier === h.tier;
+          const priorUnrevealed = hints.slice(0, i).some((prior) => !prior.revealed);
           return (
-            <li key={h.id} className="border border-border/70 bg-surface-raised/40">
+            <li key={h.tier} className="border border-border/70 bg-surface-raised/40">
               <button
                 type="button"
+                disabled={!h.revealed && priorUnrevealed}
                 onClick={() => {
-                  setOpenId(open ? null : h.id);
-                  if (!isRevealed) setRevealed((r) => [...r, h.id]);
+                  if (h.revealed) {
+                    setOpenTier(open ? null : h.tier);
+                  } else {
+                    onReveal?.(h.tier);
+                  }
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left"
+                className={cn(
+                  "flex w-full items-center gap-2 px-3 py-2 text-left",
+                  !h.revealed && priorUnrevealed && "cursor-not-allowed opacity-50",
+                )}
               >
-                <span className="font-display text-xs text-foreground">{h.title}</span>
-                <span className="font-mono ml-auto text-[0.65rem] text-primary">-{h.cost} XP</span>
-                <ChevronDown
-                  className={cn(
-                    "h-3.5 w-3.5 text-muted-foreground transition-transform",
-                    open && "rotate-180",
-                  )}
-                />
+                {!h.revealed && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+                <span className="font-display text-xs text-foreground">
+                  {TIER_LABEL[h.tier] ?? h.tier}
+                </span>
+                <span className="font-mono ml-auto text-[0.65rem] text-primary">
+                  {h.revealed ? "revealed" : revealing ? "…" : `-${h.xpCost} XP`}
+                </span>
+                {h.revealed && (
+                  <ChevronDown
+                    className={cn(
+                      "h-3.5 w-3.5 text-muted-foreground transition-transform",
+                      open && "rotate-180",
+                    )}
+                  />
+                )}
               </button>
-              {open && (
+              {open && h.revealed && (
                 <p className="border-t border-border/60 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
-                  {h.body}
+                  {h.text}
                 </p>
               )}
             </li>

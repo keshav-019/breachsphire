@@ -147,7 +147,7 @@ export default function MapPage() {
             </div>
           ) : (
             <Link
-              to="/mission"
+              to={`/worlds/${selected.id}`}
               className="corner-cut mt-6 flex items-center justify-center gap-2 bg-primary py-3 font-display text-sm tracking-[0.12em] text-primary-foreground uppercase glow-signal transition-transform hover:scale-[1.02]"
             >
               <Play className="h-4 w-4 fill-current" />

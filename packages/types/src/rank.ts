@@ -1,15 +1,21 @@
+/**
+ * The clearance progression from the World Story & Campaign Bible
+ * (docs/12-world-story-bible.md §2.1). Clearance is a story wrapper around
+ * prerequisite mastery: a player can revisit any unlocked World, but new
+ * operational privileges (real Docker labs, advanced AD ranges, exploit
+ * research, command simulations) unlock only after the required skills and
+ * safety briefings are complete.
+ */
 export const PLAYER_RANKS = [
+  "civilian",
   "recruit",
-  "trainee",
-  "cyber_cadet",
-  "cyber_defender",
-  "security_analyst",
-  "incident_responder",
+  "cadet",
+  "analyst",
+  "operator",
   "pentester",
-  "threat_hunter",
-  "red_team_specialist",
-  "blue_team_commander",
-  "cyber_guardian",
+  "hunter",
+  "specialist",
+  "commander",
   "elite_guardian",
 ] as const;
 

@@ -13,14 +13,19 @@ requires shipping new frontend code, that goal is unreachable.
 Defined in `packages/types/src/mission.ts` and consumed by both
 `apps/web` (renders it) and `apps/api` (serves/validates it):
 
-- `World`, `Campaign`, `Operation` — the content hierarchy above a mission.
+- `Act`, `World`, `Campaign`, `Operation` — the content hierarchy above a
+  mission. `Act` and `World` carry the narrative fields from the
+  [World Story & Campaign Bible](./12-world-story-bible.md) (entry
+  incident, capstone, story reveal, transition) — that document is the
+  source of truth for what goes in them.
 - `Mission` — id, world/campaign/operation id, slug, title, description,
   `Difficulty`, story dialogue (`DialogueLine[]`, referencing `CharacterId`),
   `Objective[]`, `PrerequisiteRule`, `requiredSkills`, `LabConfig`,
   `MissionRewards`, `isBoss`.
 - `Objective` — ordered, holds one or more `Challenge`s.
 - `Challenge` — a `ChallengeType`, a `prompt`, opaque `content` (shape
-  depends on the challenge type), `hints`, and `completionConditions`.
+  depends on the challenge type), `hints` (`Hint[]`, the 5-tier ladder from
+  bible §2.3), and `completionConditions`.
 - `MissionRewards` — xp, credits, badge ids, per-skill xp, item ids.
 - `LabConfig` — which lab type backs this mission and its parameters; see
   [Lab System](./05-lab-system.md).

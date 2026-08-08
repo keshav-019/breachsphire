@@ -15,12 +15,34 @@ export type Difficulty =
 
 export type LabType = "simulation" | "shared_lab" | "isolated_lab" | "none";
 
-export interface World {
+/**
+ * The 11 Acts (0-10) from the World Story & Campaign Bible
+ * (docs/12-world-story-bible.md §2). Each Act groups several Worlds.
+ */
+export interface Act {
   id: string;
   index: number;
   slug: string;
   title: string;
+  purpose: string;
+  playerTransformation: string;
+}
+
+export interface World {
+  id: string;
+  actId: string;
+  index: number;
+  slug: string;
+  title: string;
   description: string;
+  /** In-fiction hook that opens the World — see bible §3, "entry incident". */
+  entryIncident: string;
+  /** Name of the World's closing mission, boss or otherwise. */
+  capstoneTitle: string;
+  /** What the capstone reveals about the larger Sentinel-X mystery. */
+  storyReveal: string;
+  /** The narrative hook that justifies moving into the next World. */
+  transitionHook: string;
   bossId?: string;
   unlockRequirement?: PrerequisiteRule;
 }
@@ -73,12 +95,30 @@ export type ChallengeType =
   | "timed_incident"
   | "ctf";
 
+/**
+ * The 5-tier hint ladder every World uses (bible §2.3): each tier gives
+ * away more than the last, ending in a full explained solution so a
+ * learner can never become permanently blocked.
+ */
+export type HintTier =
+  | "orientation"
+  | "concept"
+  | "tool_direction"
+  | "near_solution"
+  | "solution";
+
+export interface Hint {
+  tier: HintTier;
+  text: string;
+  xpCost: number;
+}
+
 export interface Challenge {
   id: string;
   type: ChallengeType;
   prompt: string;
   content: Record<string, unknown>;
-  hints: string[];
+  hints: Hint[];
   completionConditions: Record<string, unknown>;
 }
 
