@@ -5,6 +5,7 @@ import { RequireAuth } from "./components/auth/RequireAuth";
 import { useAuthStore } from "./store/auth";
 import CommandPage from "./pages/CommandPage";
 import MapPage from "./pages/MapPage";
+import WorldMissionsPage from "./pages/WorldMissionsPage";
 import MissionPage from "./pages/MissionPage";
 import ProfilePage from "./pages/ProfilePage";
 import LeaderboardPage from "./pages/LeaderboardPage";
@@ -32,7 +33,8 @@ export default function App() {
                 <Routes>
                   <Route path="/" element={<CommandPage />} />
                   <Route path="/map" element={<MapPage />} />
-                  <Route path="/mission" element={<MissionPage />} />
+                  <Route path="/worlds/:worldId" element={<WorldMissionsPage />} />
+                  <Route path="/mission/:missionId" element={<MissionPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/leaderboard" element={<LeaderboardPage />} />
                   <Route path="/achievements" element={<AchievementsPage />} />

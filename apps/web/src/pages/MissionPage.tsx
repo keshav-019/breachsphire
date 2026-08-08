@@ -1,151 +1,184 @@
 import { useState } from "react";
-import { Boxes, Code2, Globe, Network, Send, Sparkles } from "lucide-react";
+import { Link, useParams } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CheckCircle2, Sparkles, XCircle } from "lucide-react";
+import {
+  fetchMissionDetail,
+  revealHint,
+  startMission,
+  submitAttempt,
+  type AttemptResult,
+} from "@/lib/api";
 import { DialogueBox } from "@/components/guardians/DialogueBox";
 import { ObjectiveChecklist, type Objective } from "@/components/guardians/ObjectiveChecklist";
 import { HintPanel } from "@/components/guardians/HintPanel";
-import { TerminalPanel, type TerminalLine } from "@/components/guardians/TerminalPanel";
-import { ThreatLevelPill } from "@/components/guardians/ThreatLevelPill";
-import { cn } from "@/lib/utils";
+import { ChallengeRenderer } from "@/components/guardians/challenges/ChallengeRenderer";
+import { Button } from "@/components/ui/button";
 
-const TABS = [
-  { id: "diagram", label: "Diagram", icon: Network },
-  { id: "browser", label: "Browser Sim", icon: Globe },
-  { id: "code", label: "Code", icon: Code2 },
-] as const;
-
-const HISTORY: TerminalLine[] = [
-  { kind: "input", text: "ssh operator@10.42.7.19" },
-  { kind: "output", text: "Warning: host key changed since last contact." },
-  { kind: "error", text: "auth failed — 3 attempts remaining" },
-  { kind: "input", text: "nmap -sS -p- 10.42.7.19 --open" },
-  { kind: "output", text: "502/tcp open  modbus" },
-  { kind: "output", text: "8443/tcp open  https-alt" },
-  { kind: "success", text: "[+] evidence captured: beacon_interval=300s" },
-];
-
-const HINTS = [
-  {
-    id: "h1",
-    title: "Where is the implant calling home?",
-    body: "Modbus should never egress. Filter the pcap for outbound 8443 from the OT VLAN and look at the SNI.",
-    cost: 40,
-  },
-  {
-    id: "h2",
-    title: "Containment without downtime",
-    body: "Blocking at the PLC kills production. Push the deny rule at the boundary firewall instead.",
-    cost: 75,
-  },
-  {
-    id: "h3",
-    title: "Preserving logs",
-    body: "Snapshot the historian before you touch anything — the implant clears its own journal on restart.",
-    cost: 120,
-  },
-];
+const CHARACTER_INFO: Record<string, { name: string; role: string }> = {
+  ava: { name: "Ava", role: "Cyber Guardian Mentor" },
+  byte: { name: "Byte", role: "AI Companion" },
+  zayn: { name: "Zayn", role: "Network Specialist" },
+  luna: { name: "Luna", role: "Strategist" },
+  cipher: { name: "Cipher", role: "Unknown" },
+  sentinel_x: { name: "Sentinel-X", role: "???" },
+  system: { name: "System", role: "Automated" },
+};
 
 export default function MissionPage() {
-  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("diagram");
-  const [objectives, setObjectives] = useState<Objective[]>([
-    { id: "o1", label: "Map the OT subnet and identify live hosts", done: true },
-    { id: "o2", label: "Locate the beaconing device", done: true },
-    { id: "o3", label: "Capture the C2 domain from outbound traffic", done: false },
-    { id: "o4", label: "Apply containment at the boundary firewall", done: false },
-    { id: "o5", label: "Snapshot the historian before remediation", done: false, optional: true },
-  ]);
+  const { missionId } = useParams<{ missionId: string }>();
+  const queryClient = useQueryClient();
+  const [lastResult, setLastResult] = useState<AttemptResult | null>(null);
 
-  const toggle = (id: string) =>
-    setObjectives((prev) => prev.map((o) => (o.id === id ? { ...o, done: !o.done } : o)));
+  const missionQuery = useQuery({
+    queryKey: ["mission", missionId],
+    queryFn: () => fetchMissionDetail(missionId!),
+    enabled: Boolean(missionId),
+  });
+
+  const invalidateMission = () => queryClient.invalidateQueries({ queryKey: ["mission", missionId] });
+
+  const startMutation = useMutation({
+    mutationFn: () => startMission(missionId!),
+    onSuccess: invalidateMission,
+  });
+
+  const hintMutation = useMutation({
+    mutationFn: (tier: string) => revealHint(currentChallengeId!, tier),
+    onSuccess: invalidateMission,
+  });
+
+  const attemptMutation = useMutation({
+    mutationFn: (answer: Record<string, unknown>) => submitAttempt(currentChallengeId!, answer),
+    onSuccess: (result) => {
+      setLastResult(result);
+      invalidateMission();
+      if (mission) {
+        queryClient.invalidateQueries({ queryKey: ["worldMissions", mission.worldId] });
+        if (result.worldCleared) {
+          queryClient.invalidateQueries({ queryKey: ["worlds"] });
+        }
+      }
+    },
+  });
+
+  const mission = missionQuery.data;
+  const currentObjective = mission?.objectives.find((o) => !o.completed) ?? null;
+  // World 0 is one challenge per objective throughout -- a future world
+  // with multiple challenges per objective needs per-challenge completion
+  // in the API response to pick the right one here.
+  const currentChallenge = currentObjective?.challenges[0] ?? null;
+  const currentChallengeId = currentChallenge?.id;
+
+  if (missionQuery.isLoading) {
+    return (
+      <div className="px-5 py-8">
+        <span className="label-mono flicker">Decrypting mission file…</span>
+      </div>
+    );
+  }
+
+  if (missionQuery.error || !mission) {
+    return (
+      <div className="px-5 py-8">
+        <span className="label-mono text-threat">Failed to load this mission.</span>
+      </div>
+    );
+  }
+
+  const allComplete = mission.objectives.every((o) => o.completed);
+  const objectives: Objective[] = mission.objectives.map((o) => ({
+    id: o.id,
+    label: o.title,
+    done: o.completed,
+  }));
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col">
       <div className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-3">
-        <span className="font-mono text-xs text-primary">OP-2291 // BLACKOUT</span>
-        <ThreatLevelPill level="severe" />
-        <span className="label-mono ml-auto">Elapsed 08:41</span>
+        <Link to={`/worlds/${mission.worldId}`} className="label-mono text-primary">
+          &larr; Missions
+        </Link>
+        <span className="font-mono text-xs text-primary">{mission.title}</span>
+        {mission.isBoss && <span className="label-mono text-threat">Boss</span>}
       </div>
 
       <div className="grid flex-1 gap-4 p-4 lg:grid-cols-[300px_1fr_300px]">
         {/* LEFT — story + objectives */}
         <div className="space-y-4">
-          <DialogueBox
-            speaker="Commander Rell"
-            role="Ops Division · Handler"
-            line="Nova, the implant has been in Meridian's network for eleven days. It is patient, which means it is not a smash-and-grab. Find its voice before it finds ours."
-            tone="signal"
-          />
+          {mission.storyDialogue.map((line, i) => {
+            const info = CHARACTER_INFO[line.characterId] ?? { name: line.characterId, role: "" };
+            return <DialogueBox key={i} speaker={info.name} role={info.role} line={line.text} />;
+          })}
           <div className="hud-panel corner-cut p-4">
-            <ObjectiveChecklist objectives={objectives} onToggle={toggle} />
+            <ObjectiveChecklist objectives={objectives} />
           </div>
         </div>
 
-        {/* CENTER — interactive environment */}
-        <div className="hud-panel corner-cut flex min-h-[420px] flex-col">
-          <div className="flex items-center gap-1 border-b border-border px-2">
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setTab(t.id)}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-3 font-mono text-[0.68rem] tracking-[0.16em] uppercase transition-colors",
-                  tab === t.id
-                    ? "border-b-2 border-primary text-primary"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                <t.icon className="h-3.5 w-3.5" />
-                {t.label}
-              </button>
-            ))}
-            <span className="label-mono ml-auto pr-3">Sandbox live</span>
-          </div>
-
-          <div className="hud-grid relative flex flex-1 items-center justify-center p-6">
-            <div className="pointer-events-none absolute inset-y-0 w-32 bg-gradient-to-r from-transparent via-telemetry/8 to-transparent sweep-line" />
-            <div className="text-center">
-              <span className="mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-telemetry/50 bg-telemetry/10 text-telemetry">
-                <Boxes className="h-7 w-7" />
-              </span>
-              <h2 className="mt-4 font-display text-lg text-foreground">
-                {TABS.find((t) => t.id === tab)?.label} environment
-              </h2>
-              <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-                Interactive scenario surface mounts here — network topology, simulated browser, or
-                the code workspace for this objective.
+        {/* CENTER — the challenge itself */}
+        <div className="hud-panel corner-cut flex min-h-[420px] flex-col justify-center p-6">
+          {mission.status === "available" && !startMutation.isSuccess ? (
+            <div className="mx-auto max-w-sm space-y-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                Briefing received. Start the mission to begin.
               </p>
-              <div className="mt-5 inline-flex gap-2">
-                <span className="label-mono border border-border px-3 py-1.5">Zoom</span>
-                <span className="label-mono border border-border px-3 py-1.5">Inspect</span>
-                <span className="label-mono border border-border px-3 py-1.5">Reset</span>
-              </div>
+              <Button disabled={startMutation.isPending} onClick={() => startMutation.mutate()}>
+                Start mission
+              </Button>
             </div>
-          </div>
+          ) : allComplete ? (
+            <div className="mx-auto max-w-sm space-y-4 text-center">
+              <CheckCircle2 className="mx-auto h-10 w-10 text-telemetry" />
+              <h2 className="font-display text-lg text-foreground">Mission complete</h2>
+              {lastResult?.rewardsApplied && (
+                <p className="font-mono text-sm text-telemetry">
+                  +{lastResult.rewardsApplied.xp} XP · +{lastResult.rewardsApplied.credits} credits
+                </p>
+              )}
+              {lastResult?.worldCleared && (
+                <p className="text-xs text-primary">World cleared — the next world just unlocked.</p>
+              )}
+              <Button asChild variant="outline">
+                <Link to={`/worlds/${mission.worldId}`}>Return to missions</Link>
+              </Button>
+            </div>
+          ) : currentChallenge ? (
+            <div className="space-y-6">
+              <p className="mx-auto max-w-xl text-center text-sm text-muted-foreground">
+                {currentChallenge.prompt}
+              </p>
+              <ChallengeRenderer
+                challenge={currentChallenge}
+                submitting={attemptMutation.isPending}
+                onSubmit={(answer) => attemptMutation.mutate(answer)}
+              />
+              {lastResult && !lastResult.correct && (
+                <div className="mx-auto flex max-w-sm items-center gap-2 border border-threat/50 bg-threat/10 p-3 text-sm text-threat">
+                  <XCircle className="h-4 w-4 shrink-0" />
+                  Not quite. Check the hints if you're stuck.
+                </div>
+              )}
+              {lastResult?.correct && !lastResult.missionCompleted && (
+                <div className="mx-auto flex max-w-sm items-center gap-2 border border-telemetry/50 bg-telemetry/10 p-3 text-sm text-telemetry">
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  Correct — moving to the next objective.
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-center text-sm text-muted-foreground">No challenge available.</p>
+          )}
         </div>
 
-        {/* RIGHT — hints, evidence, companion */}
+        {/* RIGHT — hints, companion */}
         <div className="space-y-4">
-          <HintPanel hints={HINTS} />
-
-          <div className="hud-panel corner-cut p-4">
-            <span className="label-mono text-telemetry">Evidence locker</span>
-            <ul className="mt-3 space-y-2">
-              {[
-                { n: "pcap_meridian_0311.pcap", t: "Capture" },
-                { n: "beacon_interval=300s", t: "Indicator" },
-                { n: "hash: 8f2a…c19d", t: "Artifact" },
-                { n: "historian_snapshot.img", t: "Locked" },
-              ].map((e) => (
-                <li
-                  key={e.n}
-                  className="flex items-center justify-between gap-2 border border-border/70 bg-surface-raised/40 px-3 py-2"
-                >
-                  <span className="truncate font-mono text-[0.68rem] text-foreground">{e.n}</span>
-                  <span className="label-mono shrink-0 text-[0.55rem]">{e.t}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {currentChallenge && currentChallenge.hints.length > 0 && (
+            <HintPanel
+              hints={currentChallenge.hints}
+              revealing={hintMutation.isPending}
+              onReveal={(tier) => hintMutation.mutate(tier)}
+            />
+          )}
 
           <div className="hud-panel corner-cut p-4">
             <div className="flex items-center gap-2">
@@ -153,22 +186,11 @@ export default function MissionPage() {
               <span className="label-mono text-clearance">Byte · AI companion</span>
             </div>
             <div className="mt-3 border border-clearance/30 bg-clearance/8 p-3 text-xs leading-relaxed text-foreground">
-              I cross-checked the beacon timing against known clusters. 300s with jitter under 4% —
-              that is HOLLOW TIDE tooling. Want me to pull their last known C2 ranges?
-            </div>
-            <div className="mt-3 flex items-center gap-2 border border-border bg-background/60 px-3 py-2">
-              <input
-                aria-label="Message Byte"
-                placeholder="Ask Byte…"
-                className="w-full bg-transparent font-mono text-xs text-foreground outline-none placeholder:text-muted-foreground"
-              />
-              <Send className="h-3.5 w-3.5 text-telemetry" />
+              {mission.description}
             </div>
           </div>
         </div>
       </div>
-
-      <TerminalPanel history={HISTORY} />
     </div>
   );
 }
