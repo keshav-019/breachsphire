@@ -20,3 +20,17 @@ insert into public.missions (
   ('mission-w50-05', 'world-50', 'campaign-50a', 'operation-50a-2', 'more-privileged-than-it-should-be', 'More Privileged Than It Should Be', 'This container runs with capabilities and a host mount it has no legitimate reason to need.', 'intermediate', ARRAY['ava'], '{"requiredMissionIds":["mission-w50-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"container-privilege-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w50-06', 'world-50', 'campaign-50a', 'operation-50a-2', 'boxed-in-boss', 'Boxed In', 'Identify the poisoned layer, prove exactly how it changes runtime behavior, and publish a hardened replacement image.', 'boss', ARRAY['zayn', 'ava', 'byte'], '{"requiredMissionIds":["mission-w50-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"boxed-in-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["boxed-in"],"skillXp":{"cloud_security":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w50-01', 1, 'ava', 'The deployment we traced back in World 48 pulled its container image from a registry this whole organization has always trusted without question.'),
+  ('mission-w50-01', 2, 'byte', 'Trusted doesn''t mean unmodified. Time to take the image apart, layer by layer.'),
+  ('mission-w50-02', 1, 'zayn', 'Every image is a stack of layers, each one a diff on the layer before it. Somewhere in that stack is a layer nobody meant to ship.'),
+  ('mission-w50-03', 1, 'byte', 'The Dockerfile that produced this image reads like every other build script in the org. Read it slower.'),
+  ('mission-w50-04', 1, 'zayn', 'The registry says one digest was published. The image actually running has a different one. Those two things should always match.'),
+  ('mission-w50-05', 1, 'ava', 'This container runs with host-level capabilities and a mount into the host filesystem. Nothing about its job needs either.'),
+  ('mission-w50-06', 1, 'zayn', 'Find the poisoned layer, and prove -- not assume -- exactly what it changes at runtime.'),
+  ('mission-w50-06', 2, 'byte', '...Confirmed. The layer only activates a hidden entrypoint override when a specific environment variable is present -- one only set in production, never in a dev or staging build.'),
+  ('mission-w50-06', 3, 'ava', 'That''s deliberate. It was built to pass every routine test and only misbehave where it actually matters.'),
+  ('mission-w50-06', 4, 'zayn', 'Hardened replacement is built, signed, and published. Old image is being pulled from the registry entirely.'),
+  ('mission-w50-06', 5, 'byte', 'One problem. That image isn''t only running here. It''s deployed by Kubernetes, in dozens of clusters, right now.'),
+  ('mission-w50-06', 6, 'ava', 'Then this is bigger than one registry. Time to see how far it actually spread.');
+
