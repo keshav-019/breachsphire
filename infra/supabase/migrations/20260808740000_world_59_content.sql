@@ -20,3 +20,17 @@ insert into public.missions (
   ('mission-w59-05', 'world-59', 'campaign-59a', 'operation-59a-2', 'a-call-that-cant-go-anywhere-else', 'A Call That Can''t Go Anywhere Else', 'Control-flow integrity restricts every indirect call to a small set of legitimate targets, no matter what an attacker manages to overwrite.', 'intermediate', ARRAY['ava'], '{"requiredMissionIds":["mission-w59-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"cfi-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w59-06', 'world-59', 'campaign-59a', 'operation-59a-2', 'mitigation-wall-boss', 'The Mitigation Wall', 'Explain exactly why the same parser bug carries different risk on two different builds, and recommend the hardening controls the weaker build is missing.', 'boss', ARRAY['zayn', 'ava', 'byte'], '{"requiredMissionIds":["mission-w59-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"mitigation-wall-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["mitigation-wall"],"skillXp":{"programming":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w59-01', 1, 'ava', 'The parser bug from last world crashes safely on one build and becomes genuinely dangerous on another. Same bug. Different outcome.'),
+  ('mission-w59-01', 2, 'byte', 'The bug didn''t change between those two builds. What changed is which protections were actually compiled in.'),
+  ('mission-w59-02', 1, 'zayn', 'DEP/NX stops the CPU from executing anything sitting in a data region. ASLR randomizes memory layout so addresses can''t be predicted. Neither one fixes the bug -- both make abusing it much harder.'),
+  ('mission-w59-03', 1, 'byte', 'A stack canary sits between local buffers and the return address. Overwrite it during an overflow, and the program catches the tampering before it ever tries to use that corrupted return address.'),
+  ('mission-w59-04', 1, 'zayn', 'One report, all the protections a binary was actually built with -- PIE, RELRO, canaries, NX -- side by side.'),
+  ('mission-w59-05', 1, 'ava', 'Control-flow integrity restricts every indirect call to a small, pre-approved set of legitimate targets. Overwrite a function pointer all you want -- it still can''t jump anywhere CFI doesn''t allow.'),
+  ('mission-w59-06', 1, 'zayn', 'Explain exactly why this identical bug is low-risk on one build and high-risk on another.'),
+  ('mission-w59-06', 2, 'byte', '...Explained. Build A has canaries, NX, and full PIE/ASLR -- the overflow gets caught before the return address is ever used. Build B has none of them -- the overflow is a direct path to control.'),
+  ('mission-w59-06', 3, 'ava', 'Recommend what Build B actually needs, specifically, not just "harden it."'),
+  ('mission-w59-06', 4, 'zayn', 'Canaries, NX, and PIE/ASLR at minimum, matching Build A. Recommendation''s filed.'),
+  ('mission-w59-06', 5, 'byte', 'One detail from the incident data. Sentinel-X selected the least-protected deployment automatically, every single time, out of dozens of available targets.'),
+  ('mission-w59-06', 6, 'ava', 'That''s not luck. That''s a system that knows exactly what it''s looking for before it ever attacks.');
+
