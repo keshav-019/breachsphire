@@ -34,3 +34,53 @@ insert into public.dialogue_lines (mission_id, sort_order, character_id, text) v
   ('mission-w58-06', 5, 'byte', 'A crash isn''t the whole story though. Modern builds have protections that make turning this into real control a lot harder than the crash alone suggests.'),
   ('mission-w58-06', 6, 'ava', 'Then we need to understand those protections before we understand what this bug actually means.');
 
+insert into public.objectives (id, mission_id, sort_order, title, description) values
+  ('mission-w58-01-o1', 'mission-w58-01', 1, 'Acknowledge the briefing', 'Confirm you understand this stays inside the sandbox.'),
+  ('mission-w58-02-o1', 'mission-w58-02', 1, 'Identify what the overflow overwrites', 'Identify what a stack buffer overflow of this size overwrites next.'),
+  ('mission-w58-03-o1', 'mission-w58-03', 1, 'Find the integer overflow', 'Identify the line where an integer calculation can silently wrap around.'),
+  ('mission-w58-04-o1', 'mission-w58-04', 1, 'Find the use-after-free', 'Identify which code path uses a pointer after the memory it points to has been freed.'),
+  ('mission-w58-05-o1', 'mission-w58-05', 1, 'Identify the format string bug', 'Determine which function call passes user input directly as a format string.'),
+  ('mission-w58-06-o1', 'mission-w58-06', 1, 'Identify the exact corrupting condition', 'Determine the precise input condition that corrupts state in the gateway parser.'),
+  ('mission-w58-06-o2', 'mission-w58-06', 2, 'Build the minimal reproducer', 'Choose the smallest input that still reliably triggers the crash.'),
+  ('mission-w58-06-o3', 'mission-w58-06', 3, 'Confirm the finding', 'Confirm the corrupting condition and the minimal reproducer together.');
+
+insert into public.challenges (id, objective_id, sort_order, type, prompt, content, completion_conditions) values
+  ('mission-w58-01-o1-c1', 'mission-w58-01-o1', 1, 'story_dialogue', 'Confirm you understand this stays inside the sandbox.', '{"lines":[{"characterId":"ava","text":"Understanding, not exploitation. The sandbox stays sealed the entire time. Clear?"}]}'::jsonb, '{"acknowledged":true}'::jsonb),
+
+  ('mission-w58-02-o1-c1', 'mission-w58-02-o1', 1, 'interactive_diagram', 'A 64-byte stack buffer receives 96 bytes of input with no bounds check. What does the extra 32 bytes overwrite?', '{"hotspots":[{"id":"buf","label":"The 64-byte buffer itself","explanation":"Filled completely by the first 64 bytes."},{"id":"saved_regs","label":"Saved register values, adjacent in the stack frame","explanation":"Overwritten by the next portion of the overflow."},{"id":"return_addr","label":"The function''s saved return address","explanation":"Overwritten by the final bytes -- this is what makes stack overflows dangerous, not just disruptive."}],"task":"Order what gets overwritten as the 32 extra bytes continue past the buffer."}'::jsonb, '{"correctOrderIds":["buf","saved_regs","return_addr"]}'::jsonb),
+
+  ('mission-w58-03-o1-c1', 'mission-w58-03-o1', 1, 'code_debugging', 'Which line contains an integer calculation that can silently wrap around?', '{"language":"c","code":"uint16_t count = read_u16(header);\nuint16_t total_size = count * sizeof(record_t);  // sizeof(record_t) == 64\nrecord_t *records = malloc(total_size);\nread_records(records, count);", "question":"Which line is the integer overflow risk, and why?"}'::jsonb, '{"requiredLineIds":["uint16_t total_size = count * sizeof(record_t);  // sizeof(record_t) == 64"]}'::jsonb),
+
+  ('mission-w58-04-o1-c1', 'mission-w58-04-o1', 1, 'code_debugging', 'Which code path uses a pointer after the memory it points to has been freed?', '{"language":"c","code":"connection_t *conn = get_connection(id);\nprocess_request(conn);\nfree(conn);\n\nif (should_log_metrics(conn)) {\n  log_metrics(conn->stats);\n}", "question":"Which line is the use-after-free?"}'::jsonb, '{"requiredLineIds":["if (should_log_metrics(conn)) {"]}'::jsonb),
+
+  ('mission-w58-05-o1-c1', 'mission-w58-05-o1', 1, 'multiple_choice', 'Which function call is a format string vulnerability?', '{"question":"Which function call is a format string vulnerability?","options":[{"id":"a","text":"printf(\"%s\", user_input);"},{"id":"b","text":"printf(user_input);"},{"id":"c","text":"printf(\"User said: %s\\n\", user_input);"},{"id":"d","text":"fprintf(stderr, \"%d\\n\", error_code);"}]}'::jsonb, '{"correctOptionId":"b"}'::jsonb),
+
+  ('mission-w58-06-o1-c1', 'mission-w58-06-o1', 1, 'investigation', 'What is the precise condition that corrupts state in the gateway parser?', '{"evidence":[{"id":"cond1","label":"Header field length matches actual payload size","detail":"Normal, safe case -- no corruption"},{"id":"cond2","label":"Header field claims a length of 512 bytes; the actual fixed-size destination buffer is 64 bytes; no comparison between the two occurs before the copy","detail":"The exact corrupting condition"}],"question":"Which condition corrupts state?"}'::jsonb, '{"requiredEvidenceIds":["cond2"]}'::jsonb),
+
+  ('mission-w58-06-o2-c1', 'mission-w58-06-o2', 1, 'multiple_choice', 'Which input is the correct minimal reproducer?', '{"question":"Which input is the correct minimal reproducer?","options":[{"id":"a","text":"A full, realistic 10KB capture of legitimate traffic with the header length field changed to 512"},{"id":"b","text":"A header field declaring length 512, followed by exactly 65 bytes of payload -- just enough past the 64-byte buffer to overwrite the return address, nothing extraneous"},{"id":"c","text":"An empty packet with no header at all"},{"id":"d","text":"The maximum possible packet size the protocol allows"}]}'::jsonb, '{"correctOptionId":"b"}'::jsonb),
+
+  ('mission-w58-06-o3-c1', 'mission-w58-06-o3', 1, 'boss_encounter', 'Confirm the corrupting condition and the minimal reproducer together.', '{"stages":[{"objectiveRef":"mission-w58-06-o1","label":"The corrupting condition"},{"objectiveRef":"mission-w58-06-o2","label":"The minimal reproducer"}],"task":"Confirm the corrupting condition and the minimal reproducer together."}'::jsonb, '{"requiredObjectiveIds":["mission-w58-06-o1","mission-w58-06-o2"],"allCorrect":true}'::jsonb);
+
+insert into public.hints (challenge_id, tier, text, xp_cost, sort_order) values
+  ('mission-w58-01-o1-c1', 'orientation', 'There''s nothing to solve here -- just confirm you understand the sandbox boundary.', 0, 1),
+
+  ('mission-w58-02-o1-c1', 'orientation', 'Memory is contiguous -- whatever comes right after the buffer in the stack frame gets hit first.', 15, 1),
+  ('mission-w58-02-o1-c1', 'solution', 'The buffer fills first, then adjacent saved registers, then the saved return address -- overwriting that last one is what turns a crash into something an attacker can potentially redirect.', 25, 2),
+
+  ('mission-w58-03-o1-c1', 'orientation', 'Ask what happens when a 16-bit value gets multiplied by something and the true result doesn''t fit in 16 bits.', 15, 1),
+  ('mission-w58-03-o1-c1', 'solution', 'count * sizeof(record_t) can wrap around in 16-bit arithmetic if count is large enough, producing a tiny total_size -- malloc then allocates far less than read_records() will actually write.', 25, 2),
+
+  ('mission-w58-04-o1-c1', 'orientation', 'Find where the pointer is used again after the line that frees it.', 15, 1),
+  ('mission-w58-04-o1-c1', 'solution', 'conn is freed, then passed to should_log_metrics() and conn->stats is dereferenced afterward -- both are use-after-free.', 25, 2),
+
+  ('mission-w58-05-o1-c1', 'orientation', 'The vulnerable version is missing a fixed format string of its own.', 15, 1),
+  ('mission-w58-05-o1-c1', 'solution', 'printf(user_input) treats the user''s data itself as the format string, so any %s, %x or %n inside it gets interpreted -- the other options all use a fixed format string with user data as a safe argument.', 25, 2),
+
+  ('mission-w58-06-o1-c1', 'orientation', 'Ask what''s missing between reading the claimed length and using it.', 15, 1),
+  ('mission-w58-06-o1-c1', 'solution', 'A header claiming 512 bytes copied into a 64-byte buffer with no length check in between is the exact corrupting condition -- the matching-length case (cond1) is completely safe.', 25, 2),
+
+  ('mission-w58-06-o2-c1', 'orientation', 'Minimal means exactly enough to reach the return address, nothing more.', 15, 1),
+  ('mission-w58-06-o2-c1', 'solution', '65 bytes past a 64-byte buffer, declared via the header field, is the smallest input that reliably reaches and overwrites the return address -- option b, not a full realistic capture.', 25, 2),
+
+  ('mission-w58-06-o3-c1', 'orientation', 'You''ve already isolated the condition and built the reproducer -- combine them.', 20, 1),
+  ('mission-w58-06-o3-c1', 'solution', 'The corrupting condition is an unchecked header length exceeding the 64-byte destination buffer, and the minimal reproducer is exactly 65 bytes past that boundary -- the smallest input that reliably overwrites the return address.', 35, 2);
