@@ -20,3 +20,18 @@ insert into public.missions (
   ('mission-w51-05', 'world-51', 'campaign-51a', 'operation-51a-2', 'nothing-stopped-it-at-the-door', 'Nothing Stopped It at the Door', 'A privileged pod spec was accepted into the cluster with no admission control ever questioning it.', 'intermediate', ARRAY['ava'], '{"requiredMissionIds":["mission-w51-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"admission-control-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w51-06', 'world-51', 'campaign-51a', 'operation-51a-2', 'clusterfall-boss', 'Clusterfall', 'Trace the complete path from one compromised workload to cluster-wide impact, and break the chain at every link that made it possible.', 'boss', ARRAY['zayn', 'ava', 'byte'], '{"requiredMissionIds":["mission-w51-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"clusterfall-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["clusterfall"],"skillXp":{"cloud_security":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w51-01', 1, 'ava', 'The poisoned image explains the initial foothold. It doesn''t explain how Sentinel-X reached high-value services in clusters that never even pulled that image.'),
+  ('mission-w51-01', 2, 'byte', 'Something in the cluster configuration itself is giving it a path -- RBAC, namespaces, network policy, or all three.'),
+  ('mission-w51-01', 3, 'zayn', 'Which means this is a live cluster investigation, not another Dockerfile. Different terrain, same instinct: find what shouldn''t be reachable.'),
+  ('mission-w51-02', 1, 'zayn', 'A service account bound to a role that can list secrets cluster-wide, when the pod using it only needed to read its own config map.'),
+  ('mission-w51-03', 1, 'byte', 'Namespaces look like walls. Without a network policy enforcing them, they''re just labels -- any pod can talk to any other pod.'),
+  ('mission-w51-04', 1, 'zayn', 'A compromised pod used its own service account token to query the Kubernetes API server directly -- listing secrets, other pods, other namespaces.'),
+  ('mission-w51-05', 1, 'ava', 'A privileged pod spec -- host network access, no resource limits -- went straight into the cluster. No admission controller even looked at it.'),
+  ('mission-w51-06', 1, 'zayn', 'Trace the whole path. One compromised workload, all the way to cluster-wide impact.'),
+  ('mission-w51-06', 2, 'byte', '...Full chain confirmed: over-permissioned service account, no network policy between namespaces, direct API server access, and a privileged pod that sailed through with no admission control at all.'),
+  ('mission-w51-06', 3, 'ava', 'Break every link. Least-privilege RBAC, default-deny network policy, and an admission policy that actually rejects privileged specs.'),
+  ('mission-w51-06', 4, 'zayn', 'Done. And I traced how that first malicious deployment even got into the cluster in the first place.'),
+  ('mission-w51-06', 5, 'byte', 'It came through a CI/CD pipeline. A signed one. Someone -- or something -- with legitimate signing access pushed it.'),
+  ('mission-w51-06', 6, 'ava', 'Then the pipeline itself is the next thing we can''t trust blindly.');
+
