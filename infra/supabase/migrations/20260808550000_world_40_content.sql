@@ -23,3 +23,28 @@ insert into public.missions (
   ('mission-w40-05', 'world-40', 'campaign-40a', 'operation-40a-2', 'two-halves-of-the-same-story', 'Two Halves of the Same Story', 'An endpoint alert and a network log are two halves of the same story. Read them together, then decide what happens next.', 'advanced', ARRAY['zayn', 'byte', 'luna'], '{"requiredMissionIds":["mission-w40-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"correlation-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w40-06', 'world-40', 'campaign-40a', 'operation-40a-2', 'red-alert-boss', 'Red Alert', 'Triage a flood of alerts and identify the few that represent a coordinated intrusion.', 'boss', ARRAY['luna', 'byte', 'zayn', 'ava'], '{"requiredMissionIds":["mission-w40-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"red-alert-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"skillXp":{"soc":50},"badgeIds":["red-alert"]}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w40-01', 1, 'luna', 'Everyone into the SOC, now. Whatever Cipher was about to tell you keeps until the alerts stop moving.'),
+  ('mission-w40-01', 2, 'byte', '...Alert count still climbing. Correlated events across three sectors, twelve organizations, in the last four minutes alone.'),
+  ('mission-w40-01', 3, 'zayn', 'Cipher''s still sitting in the back of my head. But there''s a wall of red in front of us and no time to think about anything else right now.'),
+  ('mission-w40-01', 4, 'ava', 'Then we stop thinking about what we can''t control and start triaging what we can. First rule: not every alert is an incident.'),
+  ('mission-w40-01', 5, 'luna', 'You''re in the queue with the rest of us. Watch, listen, keep up -- we''ll explain as we go.'),
+  ('mission-w40-02', 1, 'luna', 'An alert is a machine telling you something looked unusual. An incident is a human deciding that unusual actually matters. Confuse the two and a SOC drowns in its own noise.'),
+  ('mission-w40-02', 2, 'byte', 'The SIEM is where every log source reports in -- endpoint, network, identity, cloud. It aggregates and correlates. It does not decide anything on its own.'),
+  ('mission-w40-02', 3, 'zayn', 'EDR and XDR watch the endpoint itself -- process trees, file writes, registry changes. IDS and IPS watch the wire. SOAR is what actually runs a playbook once something, or someone, decides to act.'),
+  ('mission-w40-03', 1, 'byte', 'A laptop in the finance department suddenly spawns a PowerShell process from Microsoft Word. Where would you actually look first to confirm that happened?'),
+  ('mission-w40-04', 1, 'ava', 'The queue doesn''t pause while you think. Every alert gets a call -- dismiss it, watch it, or escalate it -- and the queue behind it keeps growing either way.'),
+  ('mission-w40-05', 1, 'zayn', 'An EDR alert on its own is a maybe. A network log on its own is a maybe. Put them together and sometimes the maybe disappears.'),
+  ('mission-w40-05', 2, 'byte', 'Here''s a process that reached out right after it was flagged. Here''s the connection it made. Read them as one story, not two.'),
+  ('mission-w40-05', 3, 'luna', 'Once you''ve confirmed it, you still have to decide what happens next -- and not every confirmed alert gets the same response.'),
+  ('mission-w40-06', 1, 'luna', 'The board still has forty-plus open alerts. Most of them are noise. A few of them aren''t. Find the few.'),
+  ('mission-w40-06', 2, 'byte', 'I''ve pulled every alert from the last six hours across all twelve organizations. No two share a file hash, a domain, or an IP.'),
+  ('mission-w40-06', 3, 'zayn', 'Then they''re not related by anything a signature would catch.'),
+  ('mission-w40-06', 4, 'ava', 'So stop looking for what they share on paper, and look for what they share in behavior.'),
+  ('mission-w40-06', 5, 'byte', '...Running the comparison now.'),
+  ('mission-w40-06', 6, 'byte', 'There it is. Different tools, different infrastructure, same rhythm -- the same dwell time before first action, the same order of steps, almost to the second, across every real incident in this set.'),
+  ('mission-w40-06', 7, 'luna', 'That''s not a coincidence. That''s one actor running the same playbook twelve times in parallel.'),
+  ('mission-w40-06', 8, 'ava', 'The true alerts share no IOC, only a behavioral rhythm.'),
+  ('mission-w40-06', 9, 'zayn', 'Which means every signature we own is about to be useless against whatever comes next.'),
+  ('mission-w40-06', 10, 'luna', 'It already is. We need detection that doesn''t depend on knowing the file or the IP in advance.');
+
