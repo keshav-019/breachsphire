@@ -20,3 +20,19 @@ insert into public.missions (
   ('mission-w48-05', 'world-48', 'campaign-48a', 'operation-48a-2', 'a-thing-that-existed-for-nine-minutes', 'A Thing That Existed for Nine Minutes', 'A compute instance spun up, did something, and tore itself down before anyone could log in to look at it. The logs are the only body left.', 'intermediate', ARRAY['byte'], '{"requiredMissionIds":["mission-w48-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"cloudtrail-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w48-06', 'world-48', 'campaign-48a', 'operation-48a-2', 'find-the-workload-boss', 'Find the Workload', 'Trace one Sentinel-X component across ephemeral cloud resources, start to finish, without ever assuming a single server holds the answer.', 'boss', ARRAY['zayn', 'ava', 'byte'], '{"requiredMissionIds":["mission-w48-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"find-the-workload-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["find-the-workload"],"skillXp":{"cloud_security":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w48-01', 1, 'ava', 'The adversary map from the last world pointed somewhere new -- cloud regions, CI/CD systems, edge devices. Nothing you can walk up to and unplug.'),
+  ('mission-w48-01', 2, 'zayn', 'That''s the part that''s going to feel wrong at first. A workload can exist for nine minutes, do its damage, and vanish. No rack. No blinking light.'),
+  ('mission-w48-01', 3, 'byte', 'Everything you already know still applies -- compute, storage, network, identity. It just doesn''t live in a building you can see.'),
+  ('mission-w48-01', 4, 'ava', 'We rebuild the map in cloud terms before we chase anything through it. Ready?'),
+  ('mission-w48-02', 1, 'zayn', 'Shared responsibility, in one sentence: the provider secures the cloud, you secure what you put in it. Mixing those up is how half of cloud breaches happen.'),
+  ('mission-w48-03', 1, 'byte', 'Compute, storage, database, network, identity -- same five categories as any datacenter. Match each cloud service to what it actually is.'),
+  ('mission-w48-04', 1, 'zayn', 'Somebody wrote an IAM policy with a wildcard action on a wildcard resource, years ago, to unblock a demo. Nobody ever tightened it back up.'),
+  ('mission-w48-04', 2, 'ava', 'That policy is attached to an automation identity that''s still active today. Find out exactly what it can touch.'),
+  ('mission-w48-05', 1, 'byte', 'A compute instance appeared in an unused region, ran for nine minutes, and tore itself down. All that''s left is what the audit log captured.'),
+  ('mission-w48-06', 1, 'ava', 'Trace this Sentinel-X component from creation to teardown. Every step it took across the account, in order.'),
+  ('mission-w48-06', 2, 'zayn', '...There it is. The whole chain traces back to one deployment, and it wasn''t a person who triggered it.'),
+  ('mission-w48-06', 3, 'byte', 'The workload was deployed from infrastructure-as-code, owned by an automation identity that''s been compromised.'),
+  ('mission-w48-06', 4, 'ava', 'Someone -- or something -- has been quietly redeploying itself through your own deployment pipeline this whole time.'),
+  ('mission-w48-06', 5, 'zayn', 'Concepts are done. Now we go find out exactly what''s wrong with this account, for real.');
+
