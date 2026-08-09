@@ -35,3 +35,53 @@ insert into public.dialogue_lines (mission_id, sort_order, character_id, text) v
   ('mission-w68-06', 6, 'byte', 'Proof. Not a description of our controls -- evidence that they actually worked, or specifically didn''t, and why.'),
   ('mission-w68-06', 7, 'luna', 'Then the next step isn''t explaining our controls. It''s proving them.');
 
+insert into public.objectives (id, mission_id, sort_order, title, description) values
+  ('mission-w68-01-o1', 'mission-w68-01', 1, 'Acknowledge the briefing', 'Confirm you understand legal and technical decisions now run in parallel.'),
+  ('mission-w68-02-o1', 'mission-w68-02', 1, 'Determine notification obligation', 'Decide whether a given incident triggers a regulatory notification requirement.'),
+  ('mission-w68-03-o1', 'mission-w68-03', 1, 'Find the jurisdiction issue', 'Identify which data flow crosses a jurisdiction it shouldn''t without proper safeguards.'),
+  ('mission-w68-04-o1', 'mission-w68-04', 1, 'Preserve a legally admissible chain of custody', 'Order the steps that keep evidence legally admissible.'),
+  ('mission-w68-05-o1', 'mission-w68-05', 1, 'Choose the correct contract clause', 'Identify the clause that should have been in the vendor contract from the start.'),
+  ('mission-w68-06-o1', 'mission-w68-06', 1, 'Coordinate the notification response', 'Choose the correct combination of notification and jurisdiction handling.'),
+  ('mission-w68-06-o2', 'mission-w68-06', 2, 'Preserve admissible evidence', 'Confirm the evidence-handling sequence remains legally sound throughout the response.'),
+  ('mission-w68-06-o3', 'mission-w68-06', 3, 'Confirm the coordinated response', 'Confirm the notification handling and evidence preservation together.');
+
+insert into public.challenges (id, objective_id, sort_order, type, prompt, content, completion_conditions) values
+  ('mission-w68-01-o1-c1', 'mission-w68-01-o1', 1, 'story_dialogue', 'Confirm you''re ready to continue.', '{"lines":[{"characterId":"ava","text":"Legal and technical, running in parallel now. Ready?"}]}'::jsonb, '{"acknowledged":true}'::jsonb),
+
+  ('mission-w68-02-o1-c1', 'mission-w68-02-o1', 1, 'multiple_choice', 'A confirmed incident exposed encrypted backup data where the encryption keys were never accessed or compromised. Does this typically trigger a regulatory notification requirement?', '{"question":"A confirmed incident exposed encrypted backup data where the encryption keys were never accessed or compromised. Does this typically trigger a regulatory notification requirement?","options":[{"id":"a","text":"Yes, always, regardless of encryption status"},{"id":"b","text":"Generally no under most breach-notification frameworks -- properly encrypted data with uncompromised keys is typically excluded from notification triggers, though this must be confirmed with counsel for the specific jurisdiction"},{"id":"c","text":"Only if the company wants to notify"},{"id":"d","text":"Notification requirements never depend on encryption status"}]}'::jsonb, '{"correctOptionId":"b"}'::jsonb),
+
+  ('mission-w68-03-o1-c1', 'mission-w68-03-o1', 1, 'investigation', 'Which data flow crosses a jurisdiction without proper safeguards?', '{"evidence":[{"id":"flow1","label":"Flow A","detail":"Customer data transferred between two regions under a signed data-transfer agreement with documented legal safeguards"},{"id":"flow2","label":"Flow B","detail":"Customer data copied to a support vendor''s server in a different jurisdiction with no data-transfer agreement on file and no documented safeguard"}],"question":"Which flow is the jurisdiction issue?"}'::jsonb, '{"requiredEvidenceIds":["flow2"]}'::jsonb),
+
+  ('mission-w68-04-o1-c1', 'mission-w68-04-o1', 1, 'interactive_diagram', 'Order the steps that keep this evidence legally admissible.', '{"hotspots":[{"id":"collect","label":"Collect the evidence using a documented, repeatable method","explanation":"How it was gathered has to be defensible from the start."},{"id":"hash","label":"Generate and record a cryptographic hash of the evidence immediately after collection","explanation":"Proves the evidence hasn''t been altered since collection."},{"id":"log_custody","label":"Log every person who accesses the evidence and when","explanation":"An unbroken record of who had it and why."},{"id":"verify_hash","label":"Re-verify the hash before presenting the evidence","explanation":"Confirms nothing changed across the entire chain."}],"task":"Order the chain-of-custody steps."}'::jsonb, '{"correctOrderIds":["collect","hash","log_custody","verify_hash"]}'::jsonb),
+
+  ('mission-w68-05-o1-c1', 'mission-w68-05-o1', 1, 'multiple_choice', 'What contractual clause should have been included from the start to prevent this supplier evidence dispute?', '{"question":"What contractual clause should have been included from the start to prevent this supplier evidence dispute?","options":[{"id":"a","text":"A marketing exclusivity clause"},{"id":"b","text":"A right-to-audit clause, giving the organization or an independent third party the contractual right to verify the supplier''s security controls directly"},{"id":"c","text":"A clause requiring the supplier to use a specific font in their reports"},{"id":"d","text":"No clause is necessary -- questionnaires are always sufficient"}]}'::jsonb, '{"correctOptionId":"b"}'::jsonb),
+
+  ('mission-w68-06-o1-c1', 'mission-w68-06-o1', 1, 'multiple_choice', 'This incident involves unencrypted customer data (notification required) that also briefly transited a jurisdiction with no data-transfer agreement in place. What''s the correct coordinated response?', '{"question":"This incident involves unencrypted customer data (notification required) that also briefly transited a jurisdiction with no data-transfer agreement in place. What''s the correct coordinated response?","options":[{"id":"a","text":"Notify only, and ignore the jurisdiction issue since it wasn''t the main incident"},{"id":"b","text":"Notify affected regulators and individuals within the required timeframe, and separately address the jurisdiction gap with counsel -- both are real, independent obligations that need their own response"},{"id":"c","text":"Address the jurisdiction issue only, since it happened first"},{"id":"d","text":"Wait for both issues to resolve themselves before doing anything"}]}'::jsonb, '{"correctOptionId":"b"}'::jsonb),
+
+  ('mission-w68-06-o2-c1', 'mission-w68-06-o2', 1, 'multiple_choice', 'While notifying regulators and addressing the jurisdiction gap, how should the technical evidence supporting the incident timeline be handled?', '{"question":"While notifying regulators and addressing the jurisdiction gap, how should the technical evidence supporting the incident timeline be handled?","options":[{"id":"a","text":"Set it aside until the legal issues are fully resolved"},{"id":"b","text":"Maintain the same chain-of-custody discipline throughout -- hashed at collection, access logged, re-verified before use -- since this evidence will support both the regulatory filing and any later legal proceeding"},{"id":"c","text":"Delete it once the notification is sent, since it''s no longer needed"},{"id":"d","text":"Hand it directly to the affected customers with no controls"}]}'::jsonb, '{"correctOptionId":"b"}'::jsonb),
+
+  ('mission-w68-06-o3-c1', 'mission-w68-06-o3', 1, 'boss_encounter', 'Confirm the coordinated notification response and the preserved evidence chain together.', '{"stages":[{"objectiveRef":"mission-w68-06-o1","label":"The coordinated response"},{"objectiveRef":"mission-w68-06-o2","label":"The preserved evidence chain"}],"task":"Confirm the coordinated notification response and the preserved evidence chain together."}'::jsonb, '{"requiredObjectiveIds":["mission-w68-06-o1","mission-w68-06-o2"],"allCorrect":true}'::jsonb);
+
+insert into public.hints (challenge_id, tier, text, xp_cost, sort_order) values
+  ('mission-w68-01-o1-c1', 'orientation', 'There''s nothing to solve here -- just confirm you''re ready to continue.', 0, 1),
+
+  ('mission-w68-02-o1-c1', 'orientation', 'Most breach-notification frameworks care about whether the exposed data was actually usable by an attacker.', 15, 1),
+  ('mission-w68-02-o1-c1', 'solution', 'Properly encrypted data with uncompromised keys generally isn''t considered a reportable breach under most frameworks -- though jurisdiction-specific confirmation with counsel is still required. Option b.', 25, 2),
+
+  ('mission-w68-03-o1-c1', 'orientation', 'Ask which flow has actual legal paperwork behind it versus which one doesn''t.', 15, 1),
+  ('mission-w68-03-o1-c1', 'solution', 'Flow B has no data-transfer agreement or documented safeguard at all -- Flow A is properly covered by a signed agreement.', 25, 2),
+
+  ('mission-w68-04-o1-c1', 'orientation', 'Prove the evidence hasn''t changed, both right after collection and right before it''s used.', 15, 1),
+  ('mission-w68-04-o1-c1', 'solution', 'Collect with a documented method, hash immediately, log every access, then re-verify the hash before presentation -- each step proves integrity at a different point in the chain.', 25, 2),
+
+  ('mission-w68-05-o1-c1', 'orientation', 'Ask what would have let the organization independently verify the supplier''s claims instead of just trusting them.', 15, 1),
+  ('mission-w68-05-o1-c1', 'solution', 'A right-to-audit clause gives contractual power to actually verify controls, rather than relying on a questionnaire the supplier can simply stop supporting. Option b.', 25, 2),
+
+  ('mission-w68-06-o1-c1', 'orientation', 'These are two separate legal obligations, triggered by two separate facts -- treat them as such.', 15, 1),
+  ('mission-w68-06-o1-c1', 'solution', 'Notification and jurisdiction handling are independent obligations that both need a real, timely response -- addressing only one and ignoring the other leaves genuine exposure. Option b.', 25, 2),
+
+  ('mission-w68-06-o2-c1', 'orientation', 'This evidence has to survive scrutiny from more than one audience -- regulators now, possibly a court later.', 15, 1),
+  ('mission-w68-06-o2-c1', 'solution', 'Maintaining the same chain-of-custody discipline throughout keeps the evidence usable for both the regulatory filing and any future legal proceeding. Option b.', 25, 2),
+
+  ('mission-w68-06-o3-c1', 'orientation', 'You''ve already handled the notification and preserved the evidence -- combine them.', 20, 1),
+  ('mission-w68-06-o3-c1', 'solution', 'Regulators and affected individuals are notified on time, the jurisdiction gap is separately addressed with counsel, and the same disciplined chain of custody supports both the regulatory filing and any future proceeding.', 35, 2);
