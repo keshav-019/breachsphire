@@ -13,9 +13,16 @@
     "typecheck": "turbo run typecheck",
     "dev:web": "pnpm --filter @cyber-guardians/web dev",
     "dev:api": "pnpm --filter @cyber-guardians/api dev",
+    "vercel-build": "pnpm --filter @cyber-guardians/web build",
     "db:start": "supabase start --workdir infra",
     "db:stop": "supabase stop --workdir infra",
     "db:status": "supabase status --workdir infra"
+  },
+  "dependencies": {
+    "@nestjs/core": "^10.4.15",
+    "@nestjs/platform-express": "^10.4.15",
+    "express": "^4.21.2",
+    "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
     "supabase": "^2.112.0",
