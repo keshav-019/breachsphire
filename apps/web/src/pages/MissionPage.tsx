@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Sparkles, XCircle } from "lucide-react";
@@ -12,20 +12,45 @@ import {
 import { DialogueBox } from "@/components/guardians/DialogueBox";
 import { ObjectiveChecklist, type Objective } from "@/components/guardians/ObjectiveChecklist";
 import { HintPanel } from "@/components/guardians/HintPanel";
+import { IdleHintPrompt } from "@/components/guardians/IdleHintPrompt";
 import { ChallengeRenderer } from "@/components/guardians/challenges/ChallengeRenderer";
 import { Button } from "@/components/ui/button";
 import { getCharacterProfile } from "@/lib/characters";
+import { useIdleHintPrompt } from "@/hooks/useIdleHintPrompt";
 
 export default function MissionPage() {
   const { missionId } = useParams<{ missionId: string }>();
   const queryClient = useQueryClient();
   const [lastResult, setLastResult] = useState<AttemptResult | null>(null);
+  const [autoOpenHintTier, setAutoOpenHintTier] = useState<string | null>(null);
 
   const missionQuery = useQuery({
     queryKey: ["mission", missionId],
     queryFn: () => fetchMissionDetail(missionId!),
     enabled: Boolean(missionId),
   });
+
+  const mission = missionQuery.data;
+  const currentObjective = mission?.objectives.find((objective) => !objective.completed) ?? null;
+  // World 0 is one challenge per objective throughout -- a future world
+  // with multiple challenges per objective needs per-challenge completion
+  // in the API response to pick the right one here.
+  const currentChallenge = currentObjective?.challenges[0] ?? null;
+  const currentChallengeId = currentChallenge?.id;
+  const nextHint = currentChallenge?.hints.find((hint) => !hint.revealed) ?? null;
+  const canOfferIdleHint =
+    mission?.status === "in_progress" &&
+    currentChallenge?.type !== "story_dialogue" &&
+    Boolean(nextHint);
+  const idleHintPrompt = useIdleHintPrompt({
+    challengeId: currentChallengeId,
+    enabled: canOfferIdleHint,
+  });
+
+  useEffect(() => {
+    setAutoOpenHintTier(null);
+    setLastResult(null);
+  }, [currentChallengeId]);
 
   const invalidateMission = () => queryClient.invalidateQueries({ queryKey: ["mission", missionId] });
 
@@ -36,7 +61,10 @@ export default function MissionPage() {
 
   const hintMutation = useMutation({
     mutationFn: (tier: string) => revealHint(currentChallengeId!, tier),
-    onSuccess: invalidateMission,
+    onSuccess: async (_hint, tier) => {
+      setAutoOpenHintTier(tier);
+      await invalidateMission();
+    },
   });
 
   const attemptMutation = useMutation({
@@ -53,13 +81,10 @@ export default function MissionPage() {
     },
   });
 
-  const mission = missionQuery.data;
-  const currentObjective = mission?.objectives.find((o) => !o.completed) ?? null;
-  // World 0 is one challenge per objective throughout -- a future world
-  // with multiple challenges per objective needs per-challenge completion
-  // in the API response to pick the right one here.
-  const currentChallenge = currentObjective?.challenges[0] ?? null;
-  const currentChallengeId = currentChallenge?.id;
+  const handleHintReveal = (tier: string) => {
+    idleHintPrompt.dismiss();
+    hintMutation.mutate(tier);
+  };
 
   if (missionQuery.isLoading) {
     return (
@@ -146,11 +171,28 @@ export default function MissionPage() {
               <p className="mx-auto max-w-xl text-center text-sm text-muted-foreground">
                 {currentChallenge.prompt}
               </p>
-              <ChallengeRenderer
-                challenge={currentChallenge}
-                submitting={attemptMutation.isPending}
-                onSubmit={(answer) => attemptMutation.mutate(answer)}
-              />
+              <div
+                data-testid="challenge-interaction-zone"
+                onChangeCapture={idleHintPrompt.noteActivity}
+                onClickCapture={idleHintPrompt.noteActivity}
+                onInputCapture={idleHintPrompt.noteActivity}
+                onKeyDownCapture={idleHintPrompt.noteActivity}
+                onPointerDownCapture={idleHintPrompt.noteActivity}
+              >
+                <ChallengeRenderer
+                  challenge={currentChallenge}
+                  submitting={attemptMutation.isPending}
+                  onSubmit={(answer) => attemptMutation.mutate(answer)}
+                />
+              </div>
+              {idleHintPrompt.visible && nextHint && (
+                <IdleHintPrompt
+                  hint={nextHint}
+                  revealing={hintMutation.isPending}
+                  onReveal={handleHintReveal}
+                  onDismiss={idleHintPrompt.dismiss}
+                />
+              )}
               {lastResult && !lastResult.correct && (
                 <div className="mx-auto flex max-w-sm items-center gap-2 border border-threat/50 bg-threat/10 p-3 text-sm text-threat">
                   <XCircle className="h-4 w-4 shrink-0" />
@@ -173,9 +215,18 @@ export default function MissionPage() {
         <div className="space-y-4">
           {currentChallenge && currentChallenge.hints.length > 0 && (
             <HintPanel
+              key={currentChallenge.id}
               hints={currentChallenge.hints}
               revealing={hintMutation.isPending}
-              onReveal={(tier) => hintMutation.mutate(tier)}
+              autoOpenTier={autoOpenHintTier}
+              context={{
+                challengePrompt: currentChallenge.prompt,
+                challengeType: currentChallenge.type,
+                objectiveTitle: currentObjective?.title,
+                missionTitle: mission.title,
+                missionDescription: mission.description,
+              }}
+              onReveal={handleHintReveal}
             />
           )}
 
