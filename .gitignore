@@ -2,6 +2,8 @@ node_modules/
 dist/
 build/
 .turbo/
+.vercel/
+.vercel-smoke-test/
 *.tsbuildinfo
 .env
 .env.*
@@ -13,6 +15,7 @@ build/
 coverage/
 .vscode/*
 !.vscode/extensions.json
+.claude/settings.local.json
 test-results/
 playwright-report/
 blob-report/
