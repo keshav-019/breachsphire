@@ -84,6 +84,7 @@ export interface Subsystems {
   scanTargets: ScanTargetSpec[];
   dnsRecords: DnsRecordSpec[];
   whoisRecords: WhoisRecordSpec[];
+  sudoRules: string[];
 }
 
 export interface SubsystemsSpec {
@@ -97,6 +98,7 @@ export interface SubsystemsSpec {
   scanTargets?: ScanTargetSpec[];
   dnsRecords?: DnsRecordSpec[];
   whoisRecords?: WhoisRecordSpec[];
+  sudoRules?: string[];
 }
 
 export function buildSubsystems(spec: SubsystemsSpec = {}): Subsystems {
@@ -111,6 +113,7 @@ export function buildSubsystems(spec: SubsystemsSpec = {}): Subsystems {
     scanTargets: spec.scanTargets ?? [],
     dnsRecords: spec.dnsRecords ?? [],
     whoisRecords: spec.whoisRecords ?? [],
+    sudoRules: spec.sudoRules ?? [],
   };
 }
 
