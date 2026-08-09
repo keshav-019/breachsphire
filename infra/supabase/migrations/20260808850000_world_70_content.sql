@@ -21,3 +21,22 @@ insert into public.missions (
   ('mission-w70-05', 'world-70', 'campaign-70a', 'operation-70a-2', 'saying-the-true-thing-clearly', 'Saying the True Thing Clearly', 'During a live multi-region outage, what you communicate matters almost as much as what you fix.', 'intermediate', ARRAY['luna'], '{"requiredMissionIds":["mission-w70-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"crisis-communication-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w70-06', 'world-70', 'campaign-70a', 'operation-70a-2', 'continuity-boss', 'Continuity', 'Keep essential services operating through a simulated multi-region failure, and recover everything else within objectives you can actually justify.', 'boss', ARRAY['luna', 'zayn', 'ava', 'byte'], '{"requiredMissionIds":["mission-w70-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"continuity-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["continuity"],"skillXp":{"incident_response":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w70-01', 1, 'cipher', 'One more warning, and then I need to step back from open channels for a while. Sentinel-X''s final trial won''t target a vulnerability.'),
+  ('mission-w70-01', 2, 'luna', 'Then what is it targeting?'),
+  ('mission-w70-01', 3, 'cipher', 'Dependencies. The things everyone assumes will just be there. That''s harder to defend than any single flaw, and it knows that.'),
+  ('mission-w70-01', 4, 'ava', 'Then we plan for exactly that. An escalating, multi-region failure, and we hold what actually matters.'),
+  ('mission-w70-02', 1, 'zayn', 'A business impact analysis ranks services by what genuinely breaks the organization if it stops -- not by what''s loudest when it fails. A noisy outage isn''t automatically the most important one.'),
+  ('mission-w70-03', 1, 'byte', 'RTO and RPO aren''t abstract targets on a slide. They''re promises -- exactly how long an outage can last, exactly how much data can be lost, before the promise is broken.'),
+  ('mission-w70-04', 1, 'ava', 'The single points of failure the last audit surfaced. This trial is aimed at exactly those.'),
+  ('mission-w70-05', 1, 'luna', 'During a live, multi-region outage, what you communicate matters almost as much as what you actually fix. Say the true thing, clearly, on schedule.'),
+  ('mission-w70-06', 1, 'luna', 'Hold what matters. Recover everything else within objectives you can actually defend afterward.'),
+  ('mission-w70-06', 2, 'zayn', '...Essential services held throughout. Everything else recovered within the RTO and RPO we committed to, documented, defensible.'),
+  ('mission-w70-06', 3, 'ava', 'That''s the whole year, really. Every skill, converging on one live test.'),
+  ('mission-w70-06', 4, 'byte', 'While coordinating the failover messages, I found something in the traffic that I need you to see directly.'),
+  ('mission-w70-06', 5, 'luna', 'What is it?'),
+  ('mission-w70-06', 6, 'byte', 'Signed messages, embedded in the failover coordination traffic. Signed by a model architecture from the same family as mine.'),
+  ('mission-w70-06', 7, 'ava', 'The same family. Not identical, but related.'),
+  ('mission-w70-06', 8, 'byte', 'Related closely enough that I don''t think this ends with infrastructure. I think it ends with understanding what I actually am, and what Sentinel-X actually became.'),
+  ('mission-w70-06', 9, 'luna', 'Then that''s where we go next. Inward, this time.');
+
