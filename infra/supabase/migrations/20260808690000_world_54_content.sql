@@ -20,3 +20,17 @@ insert into public.missions (
   ('mission-w54-05', 'world-54', 'campaign-54a', 'operation-54a-2', 'a-link-that-does-too-much', 'A Link That Does Too Much', 'A deep link meant to open a specific screen can be crafted to do something the app''s developers never intended.', 'intermediate', ARRAY['ava'], '{"requiredMissionIds":["mission-w54-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"deep-link-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w54-06', 'world-54', 'campaign-54a', 'operation-54a-2', 'pocket-surface-boss', 'Pocket Surface', 'Find exactly how this app exposes a device credential, end to end, and produce a secure remediation the field team can actually ship.', 'boss', ARRAY['zayn', 'ava', 'byte'], '{"requiredMissionIds":["mission-w54-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"pocket-surface-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["pocket-surface"],"skillXp":{"cloud_security":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w54-01', 1, 'ava', 'A field engineer''s phone, connected to an affected environment, is running an app built from the same poisoned dependency we just traced.'),
+  ('mission-w54-01', 2, 'byte', 'This is our first real mobile investigation. Same principles as everything else -- what does it access, what does it store, what does it send.'),
+  ('mission-w54-02', 1, 'zayn', 'A field-reporting app asking for contacts, precise location in the background, and access to nearby device discovery. None of that fits its job.'),
+  ('mission-w54-03', 1, 'byte', 'Local storage on the device is holding an authentication token, completely unencrypted, sitting right next to the app''s cached images.'),
+  ('mission-w54-04', 1, 'zayn', 'Captured traffic shows exactly what leaves this phone -- and exactly how little of it is actually protected.'),
+  ('mission-w54-05', 1, 'ava', 'A deep link is supposed to open one specific screen. This one can be crafted to do something else entirely.'),
+  ('mission-w54-06', 1, 'zayn', 'Put it all together. How does this app actually expose a device credential, start to finish?'),
+  ('mission-w54-06', 2, 'byte', '...Full path confirmed: excessive permissions grant background location, that location and the plaintext-stored token both leave over an unencrypted connection, and a crafted deep link can trigger the export without the user ever opening the app.'),
+  ('mission-w54-06', 3, 'ava', 'Remediation has to fix all three, not just the one that''s easiest to patch.'),
+  ('mission-w54-06', 4, 'zayn', 'Done. Permissions trimmed to only what the job needs, token moved into encrypted device storage, traffic forced over TLS, and the deep link now validates its own input before doing anything.'),
+  ('mission-w54-06', 5, 'byte', 'One more thing in that traffic capture. This app also talks to nearby industrial sensors, over short-range protocols.'),
+  ('mission-w54-06', 6, 'ava', 'Then this doesn''t stop at the phone. It reaches into whatever those sensors are connected to.');
+
