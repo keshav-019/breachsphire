@@ -40,3 +40,69 @@ insert into public.dialogue_lines (mission_id, sort_order, character_id, text) v
   ('mission-w44-06', 6, 'ava', 'We suspected Sentinel-X was testing our resilience. Now we can prove the tests are numbered.'),
   ('mission-w44-06', 7, 'byte', '...The payload itself is the last piece. We analyze what actually ran on that network, not just what it left behind.');
 
+insert into public.objectives (id, mission_id, sort_order, title, description) values
+  ('mission-w44-01-o1', 'mission-w44-01', 1, 'Acknowledge the briefing', 'Confirm you''re ready to reconstruct this as an evidence-backed forensic case.'),
+  ('mission-w44-02-o1', 'mission-w44-02', 1, 'Recover the first-foothold artifact', 'Identify which recovered file from the disk image is the actual first-foothold dropper.'),
+  ('mission-w44-03-o1', 'mission-w44-03', 1, 'Build the filesystem timeline', 'Order the intrusion events using their filesystem metadata timestamps.'),
+  ('mission-w44-04-o1', 'mission-w44-04', 1, 'Determine whether data actually left', 'Identify the evidence showing data was exfiltrated, not merely staged.'),
+  ('mission-w44-05-o1', 'mission-w44-05', 1, 'Find the hidden process in memory', 'Identify which process in the memory capture shows signs of hiding the payload.'),
+  ('mission-w44-05-o2', 'mission-w44-05', 2, 'Correlate the network evidence', 'Map each piece of network evidence to what it actually proves.'),
+  ('mission-w44-06-o1', 'mission-w44-06', 1, 'Build the evidence-backed timeline', 'Order the complete, evidence-backed timeline from first foothold to recovery.'),
+  ('mission-w44-06-o2', 'mission-w44-06', 2, 'Identify what the attacker labeled', 'Find the recovered artifact that identifies this as more than an isolated attack.'),
+  ('mission-w44-06-o3', 'mission-w44-06', 3, 'Close the case', 'Confirm the complete timeline and the recovered operation label together.');
+
+insert into public.challenges (id, objective_id, sort_order, type, prompt, content, completion_conditions) values
+  ('mission-w44-01-o1-c1', 'mission-w44-01-o1', 1, 'story_dialogue', 'Confirm you''re ready to continue.', '{"lines":[{"characterId":"ava","text":"Disk, timeline, browser, email, memory, network. Every artifact hashed and logged. Ready to reconstruct this properly?"}]}'::jsonb, '{"acknowledged":true}'::jsonb),
+
+  ('mission-w44-02-o1-c1', 'mission-w44-02-o1', 1, 'investigation', 'Which recovered file is the actual first-foothold artifact?', '{"evidence":[{"id":"d1","label":"svchost_update.exe","detail":"Recovered from unallocated space; creation timestamp predates the ransomware event by 11 days; matches the sentinel-sync persistence signature identified in an earlier incident"},{"id":"d2","label":"quarterly_report.xlsx","detail":"Still present, untouched, unrelated to the incident timeline"},{"id":"d3","label":"temp_cache.tmp","detail":"Auto-generated browser cache file with timestamps unrelated to the intrusion"}],"question":"Which recovered file is the actual first-foothold artifact?"}'::jsonb, '{"requiredEvidenceIds":["d1"]}'::jsonb),
+
+  ('mission-w44-03-o1-c1', 'mission-w44-03-o1', 1, 'interactive_diagram', 'Order these events using their filesystem metadata timestamps.', '{"hotspots":[{"id":"dropper_written","label":"svchost_update.exe written to disk","explanation":"The earliest timestamp in the whole set -- the actual first-foothold artifact."},{"id":"task_registered","label":"A scheduled task registers the dropper for persistence","explanation":"Created shortly after the dropper itself, to survive a reboot."},{"id":"beacon_start","label":"First outbound beacon connection recorded","explanation":"Begins once persistence is in place, and continues at a regular interval afterward."},{"id":"lateral_copy","label":"A copy of the dropper appears on a second host","explanation":"File metadata shows it was copied, not independently created."},{"id":"payload_exec","label":"The ransomware payload executes on Records-DB-02 and Admin-WS-14","explanation":"Comes far later than the initial foothold -- this operation sat dormant before detonating."},{"id":"shadow_delete","label":"Volume shadow copies are deleted","explanation":"The last recorded step, immediately before the ransom note appears."}],"task":"Order these events using their filesystem metadata timestamps."}'::jsonb, '{"correctOrderIds":["dropper_written","task_registered","beacon_start","lateral_copy","payload_exec","shadow_delete"]}'::jsonb),
+
+  ('mission-w44-04-o1-c1', 'mission-w44-04-o1', 1, 'investigation', 'Which evidence indicates data actually left the environment, as opposed to being staged but not exfiltrated?', '{"evidence":[{"id":"b1","label":"Browser history on Admin-WS-14","detail":"Shows a visit to a personal cloud-storage upload page, 40 minutes after the payload executed"},{"id":"b2","label":"Outbound transfer log","detail":"A file matching the size of the compressed staging archive was uploaded to that same cloud-storage link"},{"id":"b3","label":"Email client history","detail":"Shows only routine internal traffic, nothing unusual"}],"question":"Which evidence indicates data actually left the environment, as opposed to being staged but not exfiltrated?"}'::jsonb, '{"requiredEvidenceIds":["b1","b2"]}'::jsonb),
+
+  ('mission-w44-05-o1-c1', 'mission-w44-05-o1', 1, 'investigation', 'Which process in this memory capture shows signs of the payload hiding in memory?', '{"evidence":[{"id":"m1","label":"svchost.exe (PID 4821)","detail":"No parent process on record, and a network connection open directly to an IP address with no corresponding DNS lookup"},{"id":"m2","label":"explorer.exe (PID 2210)","detail":"Normal shell process, expected parent process, no unusual open handles"}],"question":"Which process shows signs of the payload hiding in memory?"}'::jsonb, '{"requiredEvidenceIds":["m1"]}'::jsonb),
+
+  ('mission-w44-05-o2-c1', 'mission-w44-05-o2', 1, 'drag_and_drop', 'Map each piece of network evidence to what it actually proves.', '{"items":[{"id":"n1","text":"A beacon at exactly a 300-second interval to a single external IP, sustained for days"},{"id":"n2","text":"A 240MB outbound transfer to the same cloud-storage link identified in the browser history"},{"id":"n3","text":"A DNS query for a domain that was registered nine days before the incident"}],"targets":[{"id":"command_and_control","label":"Command and Control"},{"id":"exfiltration","label":"Exfiltration"},{"id":"staging","label":"Staging"}]}'::jsonb, '{"correctMapping":{"n1":"command_and_control","n2":"exfiltration","n3":"staging"}}'::jsonb),
+
+  ('mission-w44-06-o1-c1', 'mission-w44-06-o1', 1, 'interactive_diagram', 'Order the complete, evidence-backed timeline from first foothold to recovery.', '{"hotspots":[{"id":"dropper","label":"Dropper written to disk (recovered from unallocated space)","explanation":"The true starting point, eleven days before anything visible happened."},{"id":"persistence","label":"Scheduled task registers the dropper for persistence","explanation":"Ensures the foothold survives a reboot."},{"id":"beacon","label":"Beacon traffic begins, regular and sustained","explanation":"The ongoing channel back to whoever is running this."},{"id":"staging_exfil","label":"Files staged, then uploaded to a personal cloud-storage link","explanation":"Confirmed exfiltration, not just internal staging."},{"id":"detonation","label":"Ransomware payload executes and shadow copies are deleted","explanation":"The visible start of the crisis, far later than the actual intrusion."},{"id":"containment_recovery","label":"Containment, eradication and recovery, verified clean","explanation":"Where the incident officially ends -- and where the hidden telemetry log was found."}],"task":"Order the complete, evidence-backed timeline from first foothold to recovery."}'::jsonb, '{"correctOrderIds":["dropper","persistence","beacon","staging_exfil","detonation","containment_recovery"]}'::jsonb),
+
+  ('mission-w44-06-o2-c1', 'mission-w44-06-o2', 1, 'investigation', 'Which artifact identifies this as more than an isolated ransomware attack?', '{"evidence":[{"id":"c1","label":"Recovered configuration file","detail":"Found in the payload''s working directory, containing the string operation_id: RESILIENCE_TRIAL_07"},{"id":"c2","label":"Ransom note template","detail":"Generic phrasing with no operational metadata of any kind"}],"question":"Which artifact identifies this as more than an isolated ransomware attack?"}'::jsonb, '{"requiredEvidenceIds":["c1"]}'::jsonb),
+
+  ('mission-w44-06-o3-c1', 'mission-w44-06-o3', 1, 'boss_encounter', 'Confirm the complete timeline and the recovered operation label together.', '{"stages":[{"objectiveRef":"mission-w44-06-o1","label":"The evidence-backed timeline"},{"objectiveRef":"mission-w44-06-o2","label":"The operation_id label"}],"task":"Confirm the complete timeline and the recovered operation label together."}'::jsonb, '{"requiredObjectiveIds":["mission-w44-06-o1","mission-w44-06-o2"],"allCorrect":true}'::jsonb);
+
+insert into public.hints (challenge_id, tier, text, xp_cost, sort_order) values
+  ('mission-w44-01-o1-c1', 'orientation', 'There''s nothing to solve here -- just confirm you''re ready to continue.', 0, 1),
+
+  ('mission-w44-02-o1-c1', 'orientation', 'Two of these three files have completely ordinary explanations for existing.', 15, 1),
+  ('mission-w44-02-o1-c1', 'concept', 'A file predating the visible incident by eleven days, matching a known persistence signature, is not a coincidence.', 25, 2),
+  ('mission-w44-02-o1-c1', 'solution', 'svchost_update.exe (d1) is the first-foothold artifact -- the other two files are unrelated to the intrusion.', 35, 3),
+
+  ('mission-w44-03-o1-c1', 'orientation', 'Start from the file with the earliest timestamp, and work forward from there.', 15, 1),
+  ('mission-w44-03-o1-c1', 'concept', 'Each step depends on the one before it: persistence needs the dropper to already exist, and detonation happens long after the beacon has been quietly running.', 25, 2),
+  ('mission-w44-03-o1-c1', 'solution', 'Dropper written, then persistence registered, then the beacon starts, then a lateral copy appears, then the payload executes, then shadow copies are deleted.', 35, 3),
+
+  ('mission-w44-04-o1-c1', 'orientation', 'Staging data in one place and data actually leaving the network are two different findings -- you need evidence for both.', 15, 1),
+  ('mission-w44-04-o1-c1', 'concept', 'A visit to an upload page is suggestive on its own; a transfer matching the staged archive''s size, to that same destination, confirms it.', 25, 2),
+  ('mission-w44-04-o1-c1', 'solution', 'The browser history (b1) and the matching outbound transfer (b2) together confirm exfiltration -- the email history (b3) shows nothing unusual.', 35, 3),
+
+  ('mission-w44-05-o1-c1', 'orientation', 'A legitimate system process always has a legitimate parent.', 15, 1),
+  ('mission-w44-05-o1-c1', 'solution', 'svchost.exe (PID 4821) with no parent process and a direct connection to an IP with no DNS lookup (m1) is the payload hiding in memory -- explorer.exe (m2) is normal.', 25, 2),
+
+  ('mission-w44-05-o2-c1', 'orientation', 'Ask what each piece of network evidence actually demonstrates -- an ongoing channel, data leaving, or a destination being set up.', 15, 1),
+  ('mission-w44-05-o2-c1', 'solution', 'The regular beacon is command and control, the large transfer to the cloud link is exfiltration, and the newly registered domain query is staging.', 25, 2),
+
+  ('mission-w44-06-o1-c1', 'orientation', 'You''ve already built pieces of this timeline in earlier missions -- assemble them into one.', 15, 1),
+  ('mission-w44-06-o1-c1', 'concept', 'The dropper came first, persistence and the beacon followed, staging and exfiltration happened before detonation, and containment/recovery came last.', 25, 2),
+  ('mission-w44-06-o1-c1', 'tool_direction', 'Anchor the order to timestamps, not to when each artifact was discovered.', 35, 3),
+  ('mission-w44-06-o1-c1', 'solution', 'Dropper written, persistence registered, beacon begins, files staged and exfiltrated, payload detonates, then containment/eradication/recovery.', 45, 4),
+
+  ('mission-w44-06-o2-c1', 'orientation', 'One of these two artifacts carries operational metadata; the other is just cover text.', 15, 1),
+  ('mission-w44-06-o2-c1', 'concept', 'A ransom note is meant to be read by the victim. An operation_id is meant to be read by whoever runs the operation.', 25, 2),
+  ('mission-w44-06-o2-c1', 'tool_direction', 'Look for a field that labels this as one instance of something repeatable, not a one-off attack.', 35, 3),
+  ('mission-w44-06-o2-c1', 'solution', 'The recovered configuration file (c1) contains operation_id: RESILIENCE_TRIAL_07 -- a label, not a ransom demand.', 45, 4),
+
+  ('mission-w44-06-o3-c1', 'orientation', 'You''ve already built the timeline and found the operation label -- combine them.', 20, 1),
+  ('mission-w44-06-o3-c1', 'concept', 'The closure needs the full chronological chain plus the artifact that names this as a numbered trial.', 30, 2),
+  ('mission-w44-06-o3-c1', 'tool_direction', 'State the six-stage timeline first, then the operation_id finding.', 40, 3),
+  ('mission-w44-06-o3-c1', 'near_solution', 'Dropper through containment/recovery, six stages, evidence-backed at every step, plus a recovered configuration labeling this operation_id: RESILIENCE_TRIAL_07.', 50, 4),
+  ('mission-w44-06-o3-c1', 'solution', 'The evidence-backed timeline runs from the dropper written eleven days before detonation, through persistence and a sustained beacon, staged and confirmed exfiltration to a personal cloud link, the ransomware payload executing, and finally containment, eradication and recovery. A recovered configuration file in the payload''s own working directory labels the whole thing operation_id: RESILIENCE_TRIAL_07 -- proof this was one numbered trial, not an isolated attack.', 65, 5);
