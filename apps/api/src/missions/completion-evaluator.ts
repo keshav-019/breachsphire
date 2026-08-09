@@ -88,6 +88,12 @@ export function evaluateCompletion(
     return typeof conditions.correctOptionId === "string" && answer.selectedOptionId === conditions.correctOptionId;
   }
 
+  // Multi-select variant of the above (e.g. "select every affected
+  // project" in a browser_simulation challenge).
+  if ("correctOptionIds" in conditions) {
+    return setsEqual(answer.selectedOptionIds, conditions.correctOptionIds);
+  }
+
   if ("correctPageId" in conditions) {
     return typeof conditions.correctPageId === "string" && answer.selectedPageId === conditions.correctPageId;
   }
@@ -110,6 +116,17 @@ export function evaluateCompletion(
 
   if ("requiredEvidenceIds" in conditions) {
     return setsEqual(answer.selectedEvidenceIds, conditions.requiredEvidenceIds);
+  }
+
+  // code_debugging: the player clicks the offending line(s) in a code/config
+  // block; the id compared here is the line's exact text, not a synthetic id.
+  if ("requiredLineIds" in conditions) {
+    return setsEqual(answer.selectedLineIds, conditions.requiredLineIds);
+  }
+
+  // log_analysis: same shape as requiredEvidenceIds, over log lines instead.
+  if ("requiredLogLineIds" in conditions) {
+    return setsEqual(answer.selectedLogLineIds, conditions.requiredLogLineIds);
   }
 
   throw new UnrecognizedCompletionConditionsError(conditions);
