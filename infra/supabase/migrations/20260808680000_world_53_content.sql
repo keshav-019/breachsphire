@@ -21,3 +21,16 @@ insert into public.missions (
   ('mission-w53-05', 'world-53', 'campaign-53a', 'operation-53a-2', 'what-should-have-stopped-this', 'What Should Have Stopped This', 'No registry policy required proof of where this package actually came from. That has to change before this happens again.', 'intermediate', ARRAY['ava'], '{"requiredMissionIds":["mission-w53-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"registry-policy-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w53-06', 'world-53', 'campaign-53a', 'operation-53a-2', 'poisoned-dependency-boss', 'Poisoned Dependency', 'Determine exactly which versions are affected, contain distribution before more projects pull the poisoned package, and restore trusted builds across the org.', 'boss', ARRAY['zayn', 'ava', 'byte'], '{"requiredMissionIds":["mission-w53-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"poisoned-dependency-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["poisoned-dependency"],"skillXp":{"cloud_security":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w53-01', 1, 'ava', 'The pipeline compromise traced back to a dependency, not the repository. One package, used by nearly every project in the org.'),
+  ('mission-w53-01', 2, 'byte', 'This isn''t one organization''s incident anymore. If that package is public, this is an ecosystem-wide problem.'),
+  ('mission-w53-02', 1, 'zayn', 'A package name one character off from the real one. At a glance, in a long dependency list, nobody catches that.'),
+  ('mission-w53-03', 1, 'byte', 'Two versions of the same package, a minor bump apart. Diff them. One line has nothing to do with the changelog.'),
+  ('mission-w53-04', 1, 'zayn', 'One poisoned package, pulled into dozens of internal projects. Checking each one by hand would take weeks. The SBOM shouldn''t.'),
+  ('mission-w53-05', 1, 'ava', 'No policy ever required proof of where this package came from before it was allowed into a build. That gap gets closed today.'),
+  ('mission-w53-06', 1, 'zayn', 'Full incident response. Which versions are affected, how do we stop the bleeding, and how do we get everyone back to a build we can actually trust?'),
+  ('mission-w53-06', 2, 'byte', '...Affected range confirmed, distribution contained, trusted builds restored across every affected project.'),
+  ('mission-w53-06', 3, 'ava', 'Good work. How widely did this actually spread beyond our own projects?'),
+  ('mission-w53-06', 4, 'byte', 'That''s the part you need to see. The same library is compiled into mobile apps and embedded firmware, well outside anything we''d normally call a server.'),
+  ('mission-w53-06', 5, 'zayn', 'Then this isn''t staying in the datacenter. It''s already in people''s pockets.');
+
