@@ -134,6 +134,7 @@ const MAN_PAGES: Record<string, string[]> = {
   whois: ["whois <domain> - print public registration records for a domain"],
   dig: ["dig <domain> - query DNS records for a domain"],
   nslookup: ["nslookup <domain> - query DNS records for a domain (alias for dig)"],
+  sudo: ["sudo -l - list commands this user is permitted to run with elevated privileges"],
   submit: ["submit <value> - report a finding to close out this objective"],
   man: ["man command - show the manual page for a command"],
 };
@@ -498,6 +499,14 @@ export const COMMANDS: Record<string, CommandFn> = {
   },
 
   nslookup: (args, stdin, ctx) => COMMANDS.dig(args, stdin, ctx),
+
+  sudo: (args, _stdin, ctx) => {
+    if (args[0] !== "-l") return fail(["sudo: usage: sudo -l"]);
+    if (ctx.subsystems.sudoRules.length === 0) {
+      return ok([`Sorry, user ${ctx.fs.ctx.user} may not run sudo on this host.`]);
+    }
+    return ok([`User ${ctx.fs.ctx.user} may run the following commands on this host:`, ...ctx.subsystems.sudoRules]);
+  },
 
   man: (args) => {
     const page = MAN_PAGES[args[0]];
