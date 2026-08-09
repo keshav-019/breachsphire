@@ -14,16 +14,7 @@ import { ObjectiveChecklist, type Objective } from "@/components/guardians/Objec
 import { HintPanel } from "@/components/guardians/HintPanel";
 import { ChallengeRenderer } from "@/components/guardians/challenges/ChallengeRenderer";
 import { Button } from "@/components/ui/button";
-
-const CHARACTER_INFO: Record<string, { name: string; role: string }> = {
-  ava: { name: "Ava", role: "Cyber Guardian Mentor" },
-  byte: { name: "Byte", role: "AI Companion" },
-  zayn: { name: "Zayn", role: "Network Specialist" },
-  luna: { name: "Luna", role: "Strategist" },
-  cipher: { name: "Cipher", role: "Unknown" },
-  sentinel_x: { name: "Sentinel-X", role: "???" },
-  system: { name: "System", role: "Automated" },
-};
+import { getCharacterProfile } from "@/lib/characters";
 
 export default function MissionPage() {
   const { missionId } = useParams<{ missionId: string }>();
@@ -107,8 +98,16 @@ export default function MissionPage() {
         {/* LEFT — story + objectives */}
         <div className="space-y-4">
           {mission.storyDialogue.map((line, i) => {
-            const info = CHARACTER_INFO[line.characterId] ?? { name: line.characterId, role: "" };
-            return <DialogueBox key={i} speaker={info.name} role={info.role} line={line.text} />;
+            const info = getCharacterProfile(line.characterId);
+            return (
+              <DialogueBox
+                key={i}
+                speaker={info.name}
+                characterId={line.characterId}
+                role={info.role}
+                line={line.text}
+              />
+            );
           })}
           <div className="hud-panel corner-cut p-4">
             <ObjectiveChecklist objectives={objectives} />

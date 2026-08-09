@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { DialogueBox } from "@/components/guardians/DialogueBox";
+import { getCharacterProfile } from "@/lib/characters";
 import type { ChallengeComponentProps } from "./types";
 
 export function StoryDialogueChallenge({ content, onSubmit, submitting }: ChallengeComponentProps) {
@@ -6,11 +8,20 @@ export function StoryDialogueChallenge({ content, onSubmit, submitting }: Challe
 
   return (
     <div className="mx-auto max-w-md space-y-4 text-center">
-      {lines.map((l, i) => (
-        <p key={i} className="text-sm leading-relaxed text-muted-foreground">
-          {l.text}
-        </p>
-      ))}
+      {lines.map((line, i) => {
+        const info = getCharacterProfile(line.characterId);
+
+        return (
+          <DialogueBox
+            key={i}
+            speaker={info.name}
+            characterId={line.characterId}
+            role={info.role}
+            line={line.text}
+            className="text-left"
+          />
+        );
+      })}
       <Button disabled={submitting} onClick={() => onSubmit({ acknowledged: true })}>
         Acknowledge
       </Button>
