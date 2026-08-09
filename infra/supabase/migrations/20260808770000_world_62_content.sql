@@ -20,3 +20,17 @@ insert into public.missions (
   ('mission-w62-05', 'world-62', 'campaign-62a', 'operation-62a-2', 'a-redirect-thats-trusted-too-much', 'A Redirect That''s Trusted Too Much', 'An OAuth flow that doesn''t strictly validate its redirect URI hands an attacker a way to walk off with someone else''s token.', 'intermediate', ARRAY['ava'], '{"requiredMissionIds":["mission-w62-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"oauth-chain-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w62-06', 'world-62', 'campaign-62a', 'operation-62a-2', 'edge-cases-boss', 'Edge Cases', 'Discover the multi-step chain that no single scanner finding explains, and break it at every layer it depends on.', 'boss', ARRAY['zayn', 'ava', 'byte'], '{"requiredMissionIds":["mission-w62-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"edge-cases-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["edge-cases"],"skillXp":{"web_security":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w62-01', 1, 'ava', 'Every scanner finding on this application scores individually low. Sentinel-X isn''t exploiting any one of them -- it''s exploiting the combination.'),
+  ('mission-w62-01', 2, 'byte', 'That means the usual approach -- fix the highest-severity finding first -- doesn''t apply here. We have to think in chains, not in isolated bugs.'),
+  ('mission-w62-02', 1, 'zayn', 'A front-end proxy and the back-end server, parsing the same request boundary two different ways. That mismatch smuggles a second, hidden request inside the first.'),
+  ('mission-w62-03', 1, 'byte', 'Validate, then redeem -- two separate steps. Fire both at once, many times over, and the gap between them is exactly where the bug lives.'),
+  ('mission-w62-04', 1, 'zayn', 'Deserializing untrusted data shouldn''t be able to change what code actually runs. This endpoint lets it.'),
+  ('mission-w62-05', 1, 'ava', 'An OAuth flow that doesn''t strictly validate its redirect URI hands an attacker a way to walk off with someone else''s token.'),
+  ('mission-w62-06', 1, 'zayn', 'Individually, none of these findings would even get triaged as urgent. Chain them. Show exactly how they connect.'),
+  ('mission-w62-06', 2, 'byte', '...Chain confirmed. The smuggled request races the coupon redemption to plant a malicious deserialized object, which the OAuth flow''s loose redirect validation then exfiltrates as a token.'),
+  ('mission-w62-06', 3, 'ava', 'Break it at every layer, not just the easiest one to patch.'),
+  ('mission-w62-06', 4, 'zayn', 'Done. Strict request parsing on both proxy and server, redemption made atomic, deserialization restricted to safe types, redirect URI strictly allow-listed.'),
+  ('mission-w62-06', 5, 'byte', 'The deeper question is why this chain worked at all. None of these individual flaws are exotic.'),
+  ('mission-w62-06', 6, 'ava', 'Because nobody designing this system ever assumed they''d be combined. That assumption was never written down, and it was never true.');
+
