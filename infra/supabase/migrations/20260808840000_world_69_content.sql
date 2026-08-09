@@ -20,3 +20,18 @@ insert into public.missions (
   ('mission-w69-05', 'world-69', 'campaign-69a', 'operation-69a-2', 'not-every-finding-is-equally-urgent', 'Not Every Finding Is Equally Urgent', 'A dozen audit findings, none of them identical in urgency. Classifying them correctly decides what gets fixed this week versus this year.', 'intermediate', ARRAY['luna'], '{"requiredMissionIds":["mission-w69-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"finding-classification-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w69-06', 'world-69', 'campaign-69a', 'operation-69a-2', 'proof-boss', 'Proof', 'Defend the organization''s control set to the assessor using objective evidence, and honestly acknowledge whatever gaps remain instead of hiding them.', 'boss', ARRAY['luna', 'zayn', 'ava', 'byte'], '{"requiredMissionIds":["mission-w69-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"proof-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["proof"],"skillXp":{"incident_response":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w69-01', 1, 'luna', 'The organization claims it remediated years of weaknesses. An independent assessor isn''t going to take that on faith. They want evidence.'),
+  ('mission-w69-01', 2, 'ava', 'This is where every program we''ve built this year either holds up under real scrutiny, or doesn''t.'),
+  ('mission-w69-02', 1, 'zayn', 'Internal, external, certification -- all three look at controls, but they''re answering different questions for different audiences. Confusing them wastes everyone''s time.'),
+  ('mission-w69-03', 1, 'byte', 'Testing a control across a thousand systems doesn''t mean checking all thousand. It means sampling well enough that the result actually generalizes.'),
+  ('mission-w69-04', 1, 'ava', 'A written policy proves the organization intended to do something. It doesn''t prove the control actually operated, on any given day, in the real world.'),
+  ('mission-w69-05', 1, 'luna', 'A dozen findings, none equally urgent. Classify them correctly, or you''ll spend this week fixing something that could safely wait until next year.'),
+  ('mission-w69-06', 1, 'luna', 'Defend the control set. Objective evidence for what''s working. Honest acknowledgment for what isn''t.'),
+  ('mission-w69-06', 2, 'zayn', '...Defense presented. Every claim backed by real evidence, and the two remaining gaps disclosed up front instead of hidden.'),
+  ('mission-w69-06', 3, 'ava', 'That honesty is what makes the rest of the defense credible. An assessor who catches you hiding one gap stops trusting everything else you told them.'),
+  ('mission-w69-06', 4, 'byte', 'One of the assessor''s tests went further than a normal audit. They ran a live resilience test on our recovery process.'),
+  ('mission-w69-06', 5, 'luna', 'And?'),
+  ('mission-w69-06', 6, 'byte', 'It worked, mostly. But it also surfaced hidden single points of failure in our recovery dependencies -- things that look redundant on paper and aren''t, in practice.'),
+  ('mission-w69-06', 7, 'luna', 'Then business continuity is where we go next. Recovery objectives that hold up under a real test, not a paper one.');
+
