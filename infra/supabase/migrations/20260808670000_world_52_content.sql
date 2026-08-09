@@ -20,3 +20,17 @@ insert into public.missions (
   ('mission-w52-05', 'world-52', 'campaign-52a', 'operation-52a-2', 'a-signature-that-proves-less-than-it-looks-like', 'A Signature That Proves Less Than It Looks Like', 'The artifact is signed. The signature is valid. But valid isn''t the same question as trustworthy.', 'intermediate', ARRAY['ava'], '{"requiredMissionIds":["mission-w52-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"provenance-attestation-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w52-06', 'world-52', 'campaign-52a', 'operation-52a-2', 'pipeline-breach-boss', 'Pipeline Breach', 'Identify exactly where trust was misplaced in this pipeline, and redesign the build path so the next tampering attempt can''t stay invisible.', 'boss', ARRAY['zayn', 'ava', 'byte'], '{"requiredMissionIds":["mission-w52-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"pipeline-breach-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["pipeline-breach"],"skillXp":{"cloud_security":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w52-01', 1, 'ava', 'That malicious deployment came through a signed CI/CD pipeline. Every commit is legitimate. Every test passed. The signature checks out.'),
+  ('mission-w52-01', 2, 'byte', 'Which means the pipeline itself has to be treated as production infrastructure, not just the thing that ships it.'),
+  ('mission-w52-02', 1, 'zayn', 'Source, build, test, sign, deploy. Each stage exists to catch what slipped past the one before it. Find the stage where that stopped being true.'),
+  ('mission-w52-03', 1, 'byte', 'A dozen scanner alerts on this build. Most are the usual noise. One of them is describing something real.'),
+  ('mission-w52-04', 1, 'zayn', 'Someone checked in a CI configuration file for convenience, and it''s holding something that was never supposed to leave a developer''s machine.'),
+  ('mission-w52-05', 1, 'ava', 'The artifact is signed, and the signature is cryptographically valid. That only proves who signed it -- not that what they signed was ever supposed to exist.'),
+  ('mission-w52-06', 1, 'zayn', 'Find the exact point where trust was misplaced. Not "the pipeline is bad" -- the specific stage, the specific assumption.'),
+  ('mission-w52-06', 2, 'byte', '...Found it. Signing happened before dependency resolution was locked and verified. Anything pulled in during that window got signed along with everything else, no questions asked.'),
+  ('mission-w52-06', 3, 'ava', 'So the compromise didn''t need to touch the repository at all.'),
+  ('mission-w52-06', 4, 'byte', 'Correct. It came from a dependency, pulled in during that unverified window.'),
+  ('mission-w52-06', 5, 'zayn', 'Redesign is done. Dependencies lock and get verified before signing, not after. Provenance now records exactly what was resolved, not just what was committed.'),
+  ('mission-w52-06', 6, 'ava', 'Then the dependency itself is where this actually started. Time to go find it.');
+
