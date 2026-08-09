@@ -35,3 +35,53 @@ insert into public.dialogue_lines (mission_id, sort_order, character_id, text) v
   ('mission-w63-06', 6, 'byte', 'Most of them trace back further than the technical failure. To a choice that was never written down, or a boundary nobody was assigned to own.'),
   ('mission-w63-06', 7, 'luna', 'Technical failures and governance failures. You''re about to spend an entire act learning the second kind.');
 
+insert into public.objectives (id, mission_id, sort_order, title, description) values
+  ('mission-w63-01-o1', 'mission-w63-01', 1, 'Acknowledge the briefing', 'Confirm you understand this world is about prevention, not investigation.'),
+  ('mission-w63-02-o1', 'mission-w63-02', 1, 'Categorize the threats', 'Sort each proposed feature risk into its correct threat category.'),
+  ('mission-w63-03-o1', 'mission-w63-03', 1, 'Find the missing trust boundary', 'Identify where the architecture diagram is missing a trust boundary.'),
+  ('mission-w63-04-o1', 'mission-w63-04', 1, 'Evaluate the dependency request', 'Choose the correct evaluation outcome for the proposed dependency.'),
+  ('mission-w63-05-o1', 'mission-w63-05', 1, 'Identify the non-negotiable gate item', 'Determine which release checklist item cannot be waived regardless of deadline.'),
+  ('mission-w63-06-o1', 'mission-w63-06', 1, 'Decide on the architecture', 'Choose whether to approve, revise, or reject the proposed architecture.'),
+  ('mission-w63-06-o2', 'mission-w63-06', 2, 'Justify the requirements', 'Select the security requirements that must accompany the decision.'),
+  ('mission-w63-06-o3', 'mission-w63-06', 3, 'Confirm the decision', 'Confirm the architecture decision and its justified requirements together.');
+
+insert into public.challenges (id, objective_id, sort_order, type, prompt, content, completion_conditions) values
+  ('mission-w63-01-o1-c1', 'mission-w63-01-o1', 1, 'story_dialogue', 'Confirm you''re ready to continue.', '{"lines":[{"characterId":"luna","text":"Prevention, not investigation, this time. Ready?"}]}'::jsonb, '{"acknowledged":true}'::jsonb),
+
+  ('mission-w63-02-o1-c1', 'mission-w63-02-o1', 1, 'drag_and_drop', 'Sort each proposed feature risk into its correct threat category.', '{"items":[{"id":"t1","text":"A user could log in as someone else by guessing a predictable session token"},{"id":"t2","text":"A user could modify another user''s order after checkout without authorization"},{"id":"t3","text":"A user could deny placing an order after it shipped, with no audit trail proving otherwise"},{"id":"t4","text":"A user could flood the checkout endpoint and prevent other users from placing orders"}],"targets":[{"id":"spoofing","label":"Spoofing"},{"id":"tampering","label":"Tampering"},{"id":"repudiation","label":"Repudiation"},{"id":"dos","label":"Denial of Service"}]}'::jsonb, '{"correctMapping":{"t1":"spoofing","t2":"tampering","t3":"repudiation","t4":"dos"}}'::jsonb),
+
+  ('mission-w63-03-o1-c1', 'mission-w63-03-o1', 1, 'interactive_diagram', 'Where is this architecture diagram missing a trust boundary?', '{"hotspots":[{"id":"client","label":"Public client application","explanation":"Untrusted by definition -- correctly treated as outside the trust boundary."},{"id":"api_gateway","label":"API gateway, validates authentication","explanation":"Correctly positioned as the trust boundary between public and internal."},{"id":"internal_service","label":"Internal ingestion service, accepts data directly from a third-party partner feed with no validation before processing","explanation":"A second external input with no trust boundary drawn around it at all -- the gap."},{"id":"database","label":"Database, only reachable from internal services","explanation":"Correctly isolated from direct external access."}],"task":"Which component sits outside any drawn trust boundary despite accepting external input?"}'::jsonb, '{"correctOrderIds":["internal_service"]}'::jsonb),
+
+  ('mission-w63-04-o1-c1', 'mission-w63-04-o1', 1, 'multiple_choice', 'A team wants to add a new third-party dependency with 40 weekly downloads, published two weeks ago, with no provenance attestation available. What''s the correct evaluation outcome?', '{"question":"A team wants to add a new third-party dependency with 40 weekly downloads, published two weeks ago, with no provenance attestation available. What''s the correct evaluation outcome?","options":[{"id":"a","text":"Approve immediately -- new packages are usually fine"},{"id":"b","text":"Reject or require justification and a security review before approval -- low adoption, no track record, and no provenance are exactly the pattern from this year''s supply-chain incident"},{"id":"c","text":"Approve, but only tell the security team after it''s already in production"},{"id":"d","text":"Approve automatically since it passed a basic license check"}]}'::jsonb, '{"correctOptionId":"b"}'::jsonb),
+
+  ('mission-w63-05-o1-c1', 'mission-w63-05-o1', 1, 'browser_simulation', 'Which release checklist item cannot be waived regardless of the launch deadline?', '{"screen":"release-gate-checklist","items":[{"id":"i1","label":"Marketing copy final review","waivable":true},{"id":"i2","label":"Threat model reviewed and open findings triaged","waivable":false},{"id":"i3","label":"Optional UI animation polish","waivable":true},{"id":"i4","label":"Non-critical performance benchmark on a rarely used endpoint","waivable":true}],"question":"Which item is non-negotiable?"}'::jsonb, '{"correctOptionId":"i2"}'::jsonb),
+
+  ('mission-w63-06-o1-c1', 'mission-w63-06-o1', 1, 'multiple_choice', 'The core architecture is sound, but has one missing trust boundary and one missing dependency-review gate, both fixable before launch. What''s the correct decision?', '{"question":"The core architecture is sound, but has one missing trust boundary and one missing dependency-review gate, both fixable before launch. What''s the correct decision?","options":[{"id":"a","text":"Reject outright -- start over from scratch"},{"id":"b","text":"Revise -- approve the core design, but require the two specific gaps closed before launch"},{"id":"c","text":"Approve unconditionally -- minor issues can be patched after launch"},{"id":"d","text":"Delay the decision indefinitely with no clear requirements"}]}'::jsonb, '{"correctOptionId":"b"}'::jsonb),
+
+  ('mission-w63-06-o2-c1', 'mission-w63-06-o2', 1, 'drag_and_drop', 'Select every requirement that belongs in the justification for this decision.', '{"items":[{"id":"r1","text":"Add a trust boundary and input validation around the third-party ingestion path"},{"id":"r2","text":"Add a dependency-review gate to the build pipeline before any new package is approved"},{"id":"r3","text":"Rewrite the entire product in a different language"},{"id":"r4","text":"Add marketing approval as a security gate"}],"targets":[{"id":"required","label":"Required before launch"},{"id":"not_required","label":"Not required / out of scope"}]}'::jsonb, '{"correctMapping":{"r1":"required","r2":"required","r3":"not_required","r4":"not_required"}}'::jsonb),
+
+  ('mission-w63-06-o3-c1', 'mission-w63-06-o3', 1, 'boss_encounter', 'Confirm the architecture decision and its justified requirements together.', '{"stages":[{"objectiveRef":"mission-w63-06-o1","label":"The decision"},{"objectiveRef":"mission-w63-06-o2","label":"The justified requirements"}],"task":"Confirm the architecture decision and its justified requirements together."}'::jsonb, '{"requiredObjectiveIds":["mission-w63-06-o1","mission-w63-06-o2"],"allCorrect":true}'::jsonb);
+
+insert into public.hints (challenge_id, tier, text, xp_cost, sort_order) values
+  ('mission-w63-01-o1-c1', 'orientation', 'There''s nothing to solve here -- just confirm you''re ready to continue.', 0, 1),
+
+  ('mission-w63-02-o1-c1', 'orientation', 'STRIDE: Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege -- ask which category each scenario matches.', 15, 1),
+  ('mission-w63-02-o1-c1', 'solution', 'Impersonation is spoofing, unauthorized modification is tampering, denying an action with no audit trail is repudiation, and flooding a service is denial of service.', 25, 2),
+
+  ('mission-w63-03-o1-c1', 'orientation', 'Trust boundaries belong wherever external, untrusted input enters the system -- check every entry point, not just the obvious client-facing one.', 15, 1),
+  ('mission-w63-03-o1-c1', 'solution', 'The internal ingestion service accepts data directly from an external partner feed with no trust boundary or validation drawn around it -- a second, overlooked entry point.', 25, 2),
+
+  ('mission-w63-04-o1-c1', 'orientation', 'Compare this request against the exact pattern from the supply-chain incident earlier this year.', 15, 1),
+  ('mission-w63-04-o1-c1', 'solution', 'Low download count, brand-new publish date, and no provenance are the same red flags from the poisoned-dependency incident -- this needs a real security review, not automatic approval. Option b.', 25, 2),
+
+  ('mission-w63-05-o1-c1', 'orientation', 'Ask which item, if skipped, could let a known risk ship silently.', 15, 1),
+  ('mission-w63-05-o1-c1', 'solution', 'An unreviewed threat model with untriaged findings is the one item that directly risks shipping a known, unaddressed security gap -- everything else is cosmetic or non-critical.', 25, 2),
+
+  ('mission-w63-06-o1-c1', 'orientation', 'A sound core design with fixable, specific gaps doesn''t call for starting over or ignoring the gaps.', 15, 1),
+  ('mission-w63-06-o1-c1', 'solution', 'Revising -- approving the core design while requiring the two specific gaps closed -- matches the actual risk level. Rejecting is disproportionate; approving unconditionally ignores known gaps.', 25, 2),
+
+  ('mission-w63-06-o2-c1', 'orientation', 'Each requirement should map directly to one of the two gaps you actually found.', 15, 1),
+  ('mission-w63-06-o2-c1', 'solution', 'A trust boundary on the ingestion path and a dependency-review gate in the pipeline map directly to the two findings -- a full rewrite or a marketing gate would be disproportionate and out of scope.', 25, 2),
+
+  ('mission-w63-06-o3-c1', 'orientation', 'You''ve already made the decision and selected the requirements -- combine them.', 20, 1),
+  ('mission-w63-06-o3-c1', 'solution', 'The correct decision is to revise: approve the sound core design, but require a trust boundary around the third-party ingestion path and a dependency-review gate in the build pipeline before launch.', 35, 2);
