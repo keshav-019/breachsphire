@@ -25,3 +25,30 @@ insert into public.missions (
   ('mission-w42-05', 'world-42', 'campaign-42a', 'operation-42a-2', 'a-login-from-nowhere', 'A Login From Nowhere', 'Eleven months of history, and this account has never once logged in interactively. Today it did.', 'advanced', ARRAY['byte', 'zayn'], '{"requiredMissionIds":["mission-w42-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"auth-anomaly-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w42-06', 'world-42', 'campaign-42a', 'operation-42a-2', 'sleeper-boss', 'Sleeper', 'Find a dormant foothold that has not triggered any signature.', 'boss', ARRAY['luna', 'byte', 'zayn'], '{"requiredMissionIds":["mission-w42-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"sleeper-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["sleeper"],"skillXp":{"threat_hunting":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w42-01', 1, 'luna', 'No alert today. Just a hypothesis: Sentinel-X has already pre-positioned access in another organization, sitting there, doing nothing, waiting.'),
+  ('mission-w42-01', 2, 'zayn', 'Waiting for what?'),
+  ('mission-w42-01', 3, 'luna', 'That''s what we''re here to find out. Nothing has fired. Nothing will fire, if it''s good at its job.'),
+  ('mission-w42-01', 4, 'byte', 'Which means we can''t start from a queue this time. We have to start from a question, and go looking for the answer ourselves.'),
+  ('mission-w42-01', 5, 'luna', 'Welcome to hunting. Nobody''s going to tell you where to look.'),
+  ('mission-w42-02', 1, 'byte', 'Baselining sounds simple: know what normal looks like, so anything else stands out. Actually doing it means months of patient counting.'),
+  ('mission-w42-02', 2, 'byte', 'Four thousand eight hundred hosts. I know what runs on almost all of them, almost all the time. That "almost" is where hunting happens.'),
+  ('mission-w42-03', 1, 'zayn', 'A hunt isn''t "look around and see what feels weird." That''s how you miss things and burn out in a week.'),
+  ('mission-w42-03', 2, 'luna', 'A real hunt plan starts with a hypothesis you can actually prove or disprove, and only then decides what to go looking for.'),
+  ('mission-w42-04', 1, 'zayn', 'Most DNS traffic is boring on purpose. The interesting part is whatever refuses to be boring.'),
+  ('mission-w42-04', 2, 'zayn', 'A domain that never resolves the same way twice, queried by exactly one host, on a timer nobody set -- that''s not boring.'),
+  ('mission-w42-05', 1, 'byte', 'Eleven months of history, and this account has never once logged in interactively. Today it did.'),
+  ('mission-w42-05', 2, 'zayn', 'One login isn''t proof of anything by itself. It''s a thread. Pull it.'),
+  ('mission-w42-06', 1, 'luna', 'You''ve got fragments: a process that never runs, an account that woke up once, a DNS lookup that led nowhere. Put them together.'),
+  ('mission-w42-06', 2, 'byte', 'None of it ever crossed a threshold. Nothing here would have ever fired a rule.'),
+  ('mission-w42-06', 3, 'zayn', 'That''s what a sleeper looks like when it''s good. It doesn''t hide from detection. It just never gives detection a reason to look.'),
+  ('mission-w42-06', 4, 'luna', 'Find the host. Prove it''s real. Then explain why six months of monitoring never once caught it.'),
+  ('mission-w42-06', 5, 'byte', '...Confirmed. FOUNDRY-APP03. One scheduled task, one dormant account, one DNS lookup that never got a second try -- everything staged, nothing repeated.'),
+  ('mission-w42-06', 6, 'luna', 'A foothold that did everything exactly once could sit there for years.'),
+  ('mission-w42-06', 7, 'zayn', 'Could have. Past tense might not fit anymore --'),
+  ('mission-w42-06', 8, 'byte', '...The task just executed. Right now. First time in four months.'),
+  ('mission-w42-06', 9, 'luna', 'That''s not a hunt anymore.'),
+  ('mission-w42-06', 10, 'byte', 'File encryption processes spinning up across FOUNDRY-APP03 and two adjacent hosts. This is live.'),
+  ('mission-w42-06', 11, 'zayn', 'The foothold activated and went straight for something destructive.'),
+  ('mission-w42-06', 12, 'luna', 'Everyone, this is now an active incident. Containment starts now.');
+
