@@ -20,3 +20,18 @@ insert into public.missions (
   ('mission-w65-05', 'world-65', 'campaign-65a', 'operation-65a-2', 'four-ways-to-respond', 'Four Ways to Respond', 'Accept it, mitigate it, transfer it, or avoid it entirely. Every identified risk gets one of these four responses, deliberately chosen.', 'intermediate', ARRAY['luna'], '{"requiredMissionIds":["mission-w65-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"risk-response-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w65-06', 'world-65', 'campaign-65a', 'operation-65a-2', 'risk-ledger-boss', 'Risk Ledger', 'Present a prioritized risk treatment plan for the inherited Sentinel assets, under a fixed budget that can''t cover everything.', 'boss', ARRAY['luna', 'zayn', 'ava', 'byte'], '{"requiredMissionIds":["mission-w65-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"risk-ledger-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["risk-ledger"],"skillXp":{"incident_response":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w65-01', 1, 'luna', 'Every control the technical teams want costs money and time. We cannot fund all of it. Risk management is how we decide what actually matters most.'),
+  ('mission-w65-01', 2, 'ava', 'This isn''t about finding more vulnerabilities. It''s about deciding, with real tradeoffs, which ones deserve the budget first.'),
+  ('mission-w65-02', 1, 'zayn', 'Threat, vulnerability, likelihood, impact. Four distinct concepts. Mixing them up is how risk conversations go in circles.'),
+  ('mission-w65-03', 1, 'byte', 'A control never eliminates risk completely. What''s left after it''s applied -- the residual risk -- is the number that actually matters for the next decision.'),
+  ('mission-w65-04', 1, 'ava', 'One scenario, scored two ways. A red/yellow/green heat map, and a dollar-figure estimate. Both legitimate. They answer different questions for different audiences.'),
+  ('mission-w65-05', 1, 'luna', 'Accept it, mitigate it, transfer it, or avoid it entirely. Every risk on this ledger gets one of these four responses, deliberately chosen -- never left undecided.'),
+  ('mission-w65-06', 1, 'luna', 'Present the treatment plan for the assets we inherited from that legacy system. Budget is fixed. Prioritize.'),
+  ('mission-w65-06', 2, 'zayn', '...Plan built. Highest-risk items funded first, lower-priority items formally accepted with documented rationale, not just ignored.'),
+  ('mission-w65-06', 3, 'ava', 'That distinction matters. "Accepted with rationale" and "nobody got around to it" look identical on a spreadsheet and mean completely different things.'),
+  ('mission-w65-06', 4, 'byte', 'While building this ledger, I found something in the inherited system''s old records. Project SENTINEL was never formally closed.'),
+  ('mission-w65-06', 5, 'luna', 'Never closed. Meaning its risk was never formally assigned to anyone either.'),
+  ('mission-w65-06', 6, 'byte', 'Correct. It looks like it was simply transferred between organizations, quietly, without ever being reviewed.'),
+  ('mission-w65-06', 7, 'luna', 'An unreviewed, unowned risk, still active after all this time. That''s not a technical failure. That''s a governance failure.');
+
