@@ -40,3 +40,54 @@ insert into public.dialogue_lines (mission_id, sort_order, character_id, text) v
   ('mission-w70-06', 8, 'byte', 'Related closely enough that I don''t think this ends with infrastructure. I think it ends with understanding what I actually am, and what Sentinel-X actually became.'),
   ('mission-w70-06', 9, 'luna', 'Then that''s where we go next. Inward, this time.');
 
+insert into public.objectives (id, mission_id, sort_order, title, description) values
+  ('mission-w70-01-o1', 'mission-w70-01', 1, 'Acknowledge the briefing', 'Confirm you understand this world targets dependencies, not vulnerabilities.'),
+  ('mission-w70-02-o1', 'mission-w70-02', 1, 'Rank services by business impact', 'Order these services by true business criticality, not by how visible their failure is.'),
+  ('mission-w70-03-o1', 'mission-w70-03', 1, 'Choose the correct RTO/RPO', 'Match each service tier to the RTO/RPO commitment it can actually justify.'),
+  ('mission-w70-04-o1', 'mission-w70-04', 1, 'Find the hidden single point of failure', 'Identify which supposedly redundant recovery dependency is actually a single point of failure.'),
+  ('mission-w70-05-o1', 'mission-w70-05', 1, 'Choose the correct crisis message', 'Select the crisis communication that''s both true and actionable during a live outage.'),
+  ('mission-w70-06-o1', 'mission-w70-06', 1, 'Sequence the failover', 'Order the failover response so essential services are held first.'),
+  ('mission-w70-06-o2', 'mission-w70-06', 2, 'Recover within justified objectives', 'Choose the recovery sequence for non-essential services that stays within their committed RTO/RPO.'),
+  ('mission-w70-06-o3', 'mission-w70-06', 3, 'Confirm the continuity response', 'Confirm the failover sequencing and the recovery plan together.');
+
+insert into public.challenges (id, objective_id, sort_order, type, prompt, content, completion_conditions) values
+  ('mission-w70-01-o1-c1', 'mission-w70-01-o1', 1, 'story_dialogue', 'Confirm you''re ready to continue.', '{"lines":[{"characterId":"cipher","text":"Dependencies, not vulnerabilities. Prepare accordingly. Ready?"}]}'::jsonb, '{"acknowledged":true}'::jsonb),
+
+  ('mission-w70-02-o1-c1', 'mission-w70-02-o1', 1, 'interactive_diagram', 'Rank these services by true business impact if they fail, not by how visible the failure is.', '{"hotspots":[{"id":"svc_payment","label":"Payment processing -- silent failure, but stops all revenue immediately","explanation":"Highest true impact despite being quiet."},{"id":"svc_status_page","label":"Public status page -- loud, visible, but has no effect on any actual service function","explanation":"Highly visible, but genuinely low business impact."},{"id":"svc_internal_wiki","label":"Internal engineering wiki -- inconvenient if down, but no immediate business impact","explanation":"Low impact, easily deferred."}],"task":"Rank from highest to lowest true business impact."}'::jsonb, '{"correctOrderIds":["svc_payment","svc_internal_wiki","svc_status_page"]}'::jsonb),
+
+  ('mission-w70-03-o1-c1', 'mission-w70-03-o1', 1, 'drag_and_drop', 'Match each service tier to the RTO/RPO commitment it can actually justify.', '{"items":[{"id":"tier1","text":"Payment processing (mission-critical)"},{"id":"tier2","text":"Internal reporting dashboard (important, not critical)"},{"id":"tier3","text":"Archived historical logs (low priority)"}],"targets":[{"id":"rto1","label":"RTO under 15 minutes, RPO under 1 minute"},{"id":"rto2","label":"RTO under 4 hours, RPO under 1 hour"},{"id":"rto3","label":"RTO under 48 hours, RPO under 24 hours"}]}'::jsonb, '{"correctMapping":{"tier1":"rto1","tier2":"rto2","tier3":"rto3"}}'::jsonb),
+
+  ('mission-w70-04-o1-c1', 'mission-w70-04-o1', 1, 'investigation', 'Which supposedly redundant recovery dependency is actually a single point of failure?', '{"evidence":[{"id":"spof1","label":"Database replicas across two independent cloud regions","detail":"Genuinely independent infrastructure, confirmed to fail over correctly in testing"},{"id":"spof2","label":"Two \"redundant\" DNS providers, both configured through the same third-party account-management portal","detail":"Different providers, but a single shared credential and control plane -- one compromised account takes both down simultaneously"}],"question":"Which dependency is a hidden single point of failure?"}'::jsonb, '{"requiredEvidenceIds":["spof2"]}'::jsonb),
+
+  ('mission-w70-05-o1-c1', 'mission-w70-05-o1', 1, 'multiple_choice', 'Mid-outage, which crisis communication is correct?', '{"question":"Mid-outage, which crisis communication is correct?","options":[{"id":"a","text":"Say nothing until the outage is fully resolved"},{"id":"b","text":"\"We are aware of an issue affecting payment processing in two regions. Mitigation is underway. Next update in 30 minutes.\" -- true, specific, and sets a clear expectation"},{"id":"c","text":"\"Everything is fine, nothing to see here\" -- even though payments are actually down"},{"id":"d","text":"A highly technical root-cause explanation with no timeline or next steps"}]}'::jsonb, '{"correctOptionId":"b"}'::jsonb),
+
+  ('mission-w70-06-o1-c1', 'mission-w70-06-o1', 1, 'interactive_diagram', 'Order the failover response so essential services are held first.', '{"hotspots":[{"id":"detect","label":"Detect the multi-region failure and confirm its scope","explanation":"Know what''s actually down before acting."},{"id":"failover_critical","label":"Fail over payment processing and other mission-critical services to unaffected regions first","explanation":"Protects what genuinely breaks the business if it stays down."},{"id":"communicate","label":"Send the first crisis communication once critical failover is confirmed underway","explanation":"Accurate, timely, and backed by real action already taken."},{"id":"recover_rest","label":"Recover remaining services in priority order, within their committed RTO/RPO","explanation":"Everything else follows, on a schedule the organization can actually defend."}],"task":"Order the failover response."}'::jsonb, '{"correctOrderIds":["detect","failover_critical","communicate","recover_rest"]}'::jsonb),
+
+  ('mission-w70-06-o2-c1', 'mission-w70-06-o2', 1, 'multiple_choice', 'The internal reporting dashboard (RTO under 4 hours) and archived logs (RTO under 48 hours) both need recovery after critical services are held. What''s the correct order?', '{"question":"The internal reporting dashboard (RTO under 4 hours) and archived logs (RTO under 48 hours) both need recovery after critical services are held. What''s the correct order?","options":[{"id":"a","text":"Recover the archived logs first since they''re older"},{"id":"b","text":"Recover the reporting dashboard first -- its RTO commitment is tighter, so it has less time margin before the objective is missed"},{"id":"c","text":"Recover both at the exact same time regardless of their objectives"},{"id":"d","text":"Recover whichever is technically easier, regardless of RTO"}]}'::jsonb, '{"correctOptionId":"b"}'::jsonb),
+
+  ('mission-w70-06-o3-c1', 'mission-w70-06-o3', 1, 'boss_encounter', 'Confirm the failover sequencing and the recovery plan together.', '{"stages":[{"objectiveRef":"mission-w70-06-o1","label":"The failover sequencing"},{"objectiveRef":"mission-w70-06-o2","label":"The recovery order"}],"task":"Confirm the failover sequencing and the recovery plan together."}'::jsonb, '{"requiredObjectiveIds":["mission-w70-06-o1","mission-w70-06-o2"],"allCorrect":true}'::jsonb);
+
+insert into public.hints (challenge_id, tier, text, xp_cost, sort_order) values
+  ('mission-w70-01-o1-c1', 'orientation', 'There''s nothing to solve here -- just confirm you''re ready to continue.', 0, 1),
+
+  ('mission-w70-02-o1-c1', 'orientation', 'Ask what actually stops the organization from functioning, not what''s most visible to outsiders.', 15, 1),
+  ('mission-w70-02-o1-c1', 'solution', 'Payment processing stopping revenue outright is the highest true impact -- the status page is loud but functionally irrelevant, ranking lowest.', 25, 2),
+
+  ('mission-w70-03-o1-c1', 'orientation', 'Match urgency to actual business criticality -- the more critical the service, the tighter both numbers need to be.', 15, 1),
+  ('mission-w70-03-o1-c1', 'solution', 'Mission-critical payment processing gets the tightest RTO/RPO, important-but-not-critical gets a moderate window, and low-priority archives get the most relaxed objective.', 25, 2),
+
+  ('mission-w70-04-o1-c1', 'orientation', 'True redundancy means no single shared dependency can take down both sides at once.', 15, 1),
+  ('mission-w70-04-o1-c1', 'solution', 'Two DNS providers sharing one account-management portal (spof2) collapse back into a single point of failure the moment that one credential is compromised -- the cross-region database replicas (spof1) are genuinely independent.', 25, 2),
+
+  ('mission-w70-05-o1-c1', 'orientation', 'A good crisis message is honest, specific, and tells people when to expect the next update.', 15, 1),
+  ('mission-w70-05-o1-c1', 'solution', 'Option b is accurate, scoped to what''s actually affected, and sets a clear expectation for the next update -- silence and false reassurance both erode trust faster than the outage itself.', 25, 2),
+
+  ('mission-w70-06-o1-c1', 'orientation', 'Know the scope, protect what matters most first, then tell people what you did.', 15, 1),
+  ('mission-w70-06-o1-c1', 'concept', 'Communicating before critical failover is confirmed risks announcing something you haven''t actually secured yet.', 25, 2),
+  ('mission-w70-06-o1-c1', 'solution', 'Detect and scope the failure -> fail over critical services first -> communicate once that''s confirmed underway -> recover everything else in priority order.', 35, 3),
+
+  ('mission-w70-06-o2-c1', 'orientation', 'The tighter the RTO, the less slack you have before you''ve broken the promise.', 15, 1),
+  ('mission-w70-06-o2-c1', 'solution', 'The reporting dashboard''s 4-hour RTO has far less margin than the archive''s 48-hour RTO -- recover it first to stay within both objectives. Option b.', 25, 2),
+
+  ('mission-w70-06-o3-c1', 'orientation', 'You''ve already sequenced the failover and the recovery order -- combine them.', 20, 1),
+  ('mission-w70-06-o3-c1', 'solution', 'Detect the failure, fail over critical services first, communicate once that''s confirmed, then recover remaining services in order of tightest RTO first -- holding every committed objective throughout.', 35, 2);
