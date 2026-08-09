@@ -130,6 +130,10 @@ const MAN_PAGES: Record<string, string[]> = {
   awk: ["awk '{print $N[,$M...]}' [file] - print whitespace-separated fields by position"],
   ss: ["ss - list network connections and their state"],
   netstat: ["netstat - list network connections and their state (alias for ss)"],
+  nmap: ["nmap <host> - scan a host and report open ports, protocols and service banners"],
+  whois: ["whois <domain> - print public registration records for a domain"],
+  dig: ["dig <domain> - query DNS records for a domain"],
+  nslookup: ["nslookup <domain> - query DNS records for a domain (alias for dig)"],
   submit: ["submit <value> - report a finding to close out this objective"],
   man: ["man command - show the manual page for a command"],
 };
@@ -462,6 +466,38 @@ export const COMMANDS: Record<string, CommandFn> = {
     );
     return ok([header, ...rows]);
   },
+
+  nmap: (args, _stdin, ctx) => {
+    const host = args.find((a) => !a.startsWith("-"));
+    if (!host) return fail(["nmap: usage: nmap <host>"]);
+    const target = ctx.subsystems.scanTargets.find((t) => t.host === host);
+    if (!target) return fail([`nmap: no route to host ${host}`]);
+    const lines = [`Nmap scan report for ${target.host}`, "PORT      STATE  SERVICE      BANNER"];
+    for (const p of target.ports) {
+      lines.push(
+        `${`${p.port}/${p.proto}`.padEnd(9)} ${(p.state ?? "open").padEnd(6)} ${p.service.padEnd(12)} ${p.banner ?? ""}`,
+      );
+    }
+    return ok(lines);
+  },
+
+  whois: (args, _stdin, ctx) => {
+    const domain = args[0];
+    if (!domain) return fail(["whois: usage: whois <domain>"]);
+    const record = ctx.subsystems.whoisRecords.find((r) => r.domain === domain);
+    if (!record) return fail([`whois: no match for domain ${domain}`]);
+    return ok(record.lines);
+  },
+
+  dig: (args, _stdin, ctx) => {
+    const domain = args.find((a) => !a.startsWith("-"));
+    if (!domain) return fail(["dig: usage: dig <domain>"]);
+    const record = ctx.subsystems.dnsRecords.find((r) => r.domain === domain);
+    if (!record) return ok([`;; connection timed out; no servers could be reached for ${domain}`]);
+    return ok(record.records.map((r) => `${domain}.  IN  ${r.type}  ${r.value}`));
+  },
+
+  nslookup: (args, stdin, ctx) => COMMANDS.dig(args, stdin, ctx),
 
   man: (args) => {
     const page = MAN_PAGES[args[0]];
