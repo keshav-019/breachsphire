@@ -24,3 +24,19 @@ insert into public.missions (
   ('mission-w44-05', 'world-44', 'campaign-44a', 'operation-44a-2', 'the-memory-and-the-wire', 'The Memory and the Wire', 'Disk and browser evidence tell you what happened. Memory and network traffic tell you what''s still true right now.', 'intermediate', ARRAY['byte'], '{"requiredMissionIds":["mission-w44-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"ghost-memory-network-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w44-06', 'world-44', 'campaign-44a', 'operation-44a-2', 'ghost-protocol-boss', 'Ghost Protocol', 'Produce an evidence-backed timeline from first foothold to recovery, and identify what the attacker actually measured.', 'boss', ARRAY['zayn', 'ava', 'byte'], '{"requiredMissionIds":["mission-w44-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"ghost-protocol-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["ghost-protocol"],"skillXp":{"forensics":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w44-01', 1, 'zayn', 'Mercy''s back online. Leadership wants more than "it''s fixed" -- they want proof. Full intrusion sequence, and whether anything actually left this network.'),
+  ('mission-w44-01', 2, 'ava', 'That means disk images, timelines, deleted files, memory, network captures. Every artifact, correlated, with chain of custody intact.'),
+  ('mission-w44-01', 3, 'byte', '...Evidence integrity isn''t optional here. Every step gets logged, hashed and reproducible, or it doesn''t count as proof.'),
+  ('mission-w44-02', 1, 'byte', '...There''s a file in the unallocated space of this image that predates the ransomware event by eleven days. Recover it and see what it actually is.'),
+  ('mission-w44-03', 1, 'zayn', 'Filesystem timestamps don''t care what story the attacker wants told. Build the order they actually happened in.'),
+  ('mission-w44-04', 1, 'ava', 'Staging a file is not the same as it leaving the building. We need to know which one actually happened here.'),
+  ('mission-w44-05', 1, 'byte', '...Memory holds what disk forensics can''t show you -- what was actually running. Network traffic shows where it was actually talking to.'),
+  ('mission-w44-06', 1, 'byte', '...Timeline complete. First foothold to right now, every step backed by a hashed, chain-of-custody artifact.'),
+  ('mission-w44-06', 2, 'zayn', 'Dropper, persistence, beacon, staging, exfil through a personal cloud link, then the payload actually detonates. In that order.'),
+  ('mission-w44-06', 3, 'ava', 'And the configuration file?'),
+  ('mission-w44-06', 4, 'byte', '...operation_id: RESILIENCE_TRIAL_07. Not a ransom demand. A label. Like this was one run of something repeatable.'),
+  ('mission-w44-06', 5, 'zayn', 'Trial. Seven. Whatever Cipher was cut off trying to tell us, this backs it up.'),
+  ('mission-w44-06', 6, 'ava', 'We suspected Sentinel-X was testing our resilience. Now we can prove the tests are numbered.'),
+  ('mission-w44-06', 7, 'byte', '...The payload itself is the last piece. We analyze what actually ran on that network, not just what it left behind.');
+
