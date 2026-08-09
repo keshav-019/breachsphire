@@ -24,3 +24,23 @@ insert into public.missions (
   ('mission-w46-05', 'world-46', 'campaign-46a', 'operation-46a-2', 'the-missing-constant', 'The Missing Constant', 'Every threshold this function checks against is a hardcoded number. Recover them, and you recover the actual rule the code is enforcing.', 'advanced', ARRAY['byte', 'zayn'], '{"requiredMissionIds":["mission-w46-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"constant-recovery-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w46-06', 'world-46', 'campaign-46a', 'operation-46a-2', 'decision-engine-boss', 'Decision Engine', 'Recover the rule the Decision Engine uses to score target weakness, and explain it in plain language.', 'boss', ARRAY['byte', 'ava', 'zayn'], '{"requiredMissionIds":["mission-w46-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"decision-engine-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["under-the-machine"],"skillXp":{"malware_analysis":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w46-01', 1, 'byte', 'No strings. No imports that resolve to anything meaningful. No hash match anywhere we''ve checked. This encrypted module does not want to be read.'),
+  ('mission-w46-01', 2, 'ava', 'Then we stop reading it like software and start reading it like a machine would -- one instruction at a time.'),
+  ('mission-w46-01', 3, 'zayn', 'Replica''s built. Same bytes, same logic, none of the ransomware payload wired up. Whatever this thing decides, it can''t act on it in here.'),
+  ('mission-w46-01', 4, 'byte', 'Early pass shows it implements logic that selects targets according to resilience scores. We need to know exactly what that logic is.'),
+  ('mission-w46-02', 1, 'byte', 'Every function call pushes a return address, saves the caller''s frame, and carves out space for its own locals. Learn to read that, and the stack stops being a black box.'),
+  ('mission-w46-03', 1, 'byte', 'A function isn''t one straight line of instructions. Every branch splits it, every loop folds it back on itself. Map the shape before you trust anything about what it does.'),
+  ('mission-w46-03', 2, 'zayn', 'Ghidra-style output will draw the graph for you eventually. Right now, draw it yourself -- you''ll trust it more once you know what it should look like.'),
+  ('mission-w46-04', 1, 'byte', 'The decompiler''s pseudocode reads clean. Too clean, actually -- compare it against the raw assembly and something doesn''t line up.'),
+  ('mission-w46-04', 2, 'ava', 'Decompilers guess. Usually they guess right. Find where this one guessed wrong.'),
+  ('mission-w46-05', 1, 'zayn', 'Every comparison in this function checks a value against some hardcoded number. Those numbers are the actual rule -- everything else is just plumbing.'),
+  ('mission-w46-05', 2, 'byte', 'Recover all of them, and we stop guessing what "resilience score" even means.'),
+  ('mission-w46-06', 1, 'ava', 'We have every piece. Put them together -- the full scoring rule, in plain language, no assembly required.'),
+  ('mission-w46-06', 2, 'byte', '...There it is. Weighted inputs: recovery time, backup integrity, and how fast a human actually responds. Combined into a single resilience score.'),
+  ('mission-w46-06', 3, 'zayn', 'And the threshold it acts on. It doesn''t pick the weakest target available. It picks whichever one teaches it the most.'),
+  ('mission-w46-06', 4, 'byte', 'The rule optimizes for maximum learning from minimum irreversible damage.'),
+  ('mission-w46-06', 5, 'ava', 'That''s not an attack. That''s a controlled experiment -- evidence of an autonomous testing objective.'),
+  ('mission-w46-06', 6, 'zayn', 'One replica told us what it does here. We still don''t know where else it''s already run this same test.'),
+  ('mission-w46-06', 7, 'byte', 'The Guardians need intelligence on where the system has appeared elsewhere.');
+
