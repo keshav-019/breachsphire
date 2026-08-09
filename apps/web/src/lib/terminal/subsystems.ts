@@ -50,6 +50,29 @@ export interface ConnectionSpec {
   process?: string;
 }
 
+export interface ScanPortSpec {
+  port: number;
+  proto: "tcp" | "udp";
+  state?: string;
+  service: string;
+  banner?: string;
+}
+
+export interface ScanTargetSpec {
+  host: string;
+  ports: ScanPortSpec[];
+}
+
+export interface DnsRecordSpec {
+  domain: string;
+  records: { type: string; value: string }[];
+}
+
+export interface WhoisRecordSpec {
+  domain: string;
+  lines: string[];
+}
+
 export interface Subsystems {
   processes: Map<number, ProcessSpec>;
   services: Map<string, ServiceSpec>;
@@ -58,6 +81,9 @@ export interface Subsystems {
   journal: JournalEntrySpec[];
   env: Record<string, string>;
   connections: ConnectionSpec[];
+  scanTargets: ScanTargetSpec[];
+  dnsRecords: DnsRecordSpec[];
+  whoisRecords: WhoisRecordSpec[];
 }
 
 export interface SubsystemsSpec {
@@ -68,6 +94,9 @@ export interface SubsystemsSpec {
   journal?: JournalEntrySpec[];
   env?: Record<string, string>;
   connections?: ConnectionSpec[];
+  scanTargets?: ScanTargetSpec[];
+  dnsRecords?: DnsRecordSpec[];
+  whoisRecords?: WhoisRecordSpec[];
 }
 
 export function buildSubsystems(spec: SubsystemsSpec = {}): Subsystems {
@@ -79,6 +108,9 @@ export function buildSubsystems(spec: SubsystemsSpec = {}): Subsystems {
     journal: spec.journal ?? [],
     env: { ...(spec.env ?? {}) },
     connections: spec.connections ?? [],
+    scanTargets: spec.scanTargets ?? [],
+    dnsRecords: spec.dnsRecords ?? [],
+    whoisRecords: spec.whoisRecords ?? [],
   };
 }
 
