@@ -1,23 +1,28 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Radar, Flame, ShieldHalf, Zap, LogOut } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Radar, Coins, Zap, LogOut } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
-
-const stats = [
-  { icon: Flame, label: "Streak", value: "17", tone: "signal" as const },
-  { icon: Zap, label: "XP", value: "12,480", tone: "telemetry" as const },
-  { icon: ShieldHalf, label: "Integrity", value: "94%", tone: "telemetry" as const },
-];
+import { fetchMe } from "@/lib/api";
+import { rankDisplay } from "@/lib/rank";
 
 export function HudBar() {
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
   const navigate = useNavigate();
+  const { data: me } = useQuery({ queryKey: ["me"], queryFn: fetchMe });
 
   const displayName: string =
+    me?.displayName ??
     (user?.user_metadata?.display_name as string | undefined) ??
     user?.email?.split("@")[0] ??
     "Agent";
   const initials = displayName.slice(0, 2).toUpperCase();
+  const clearance = rankDisplay(me?.rank ?? "recruit").clearance;
+
+  const stats = [
+    { icon: Zap, label: "XP", value: me ? me.xp.toLocaleString() : "—", tone: "telemetry" as const },
+    { icon: Coins, label: "Credits", value: me ? me.credits.toLocaleString() : "—", tone: "signal" as const },
+  ];
 
   const onLogout = async () => {
     await signOut();
@@ -57,7 +62,7 @@ export function HudBar() {
           <Link to="/profile" className="flex items-center gap-3 border-l border-border/70 pl-3">
             <div className="hidden text-right leading-none md:block">
               <div className="font-display text-sm text-foreground uppercase">{displayName}</div>
-              <div className="label-mono mt-1 text-telemetry">Clearance III</div>
+              <div className="label-mono mt-1 text-telemetry">Clearance {clearance}</div>
             </div>
             <div className="corner-cut grid h-9 w-9 place-items-center bg-gradient-to-br from-telemetry/30 to-primary/25 font-display text-sm text-foreground">
               {initials}
