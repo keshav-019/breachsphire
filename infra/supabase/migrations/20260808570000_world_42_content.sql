@@ -52,3 +52,68 @@ insert into public.dialogue_lines (mission_id, sort_order, character_id, text) v
   ('mission-w42-06', 11, 'zayn', 'The foothold activated and went straight for something destructive.'),
   ('mission-w42-06', 12, 'luna', 'Everyone, this is now an active incident. Containment starts now.');
 
+insert into public.objectives (id, mission_id, sort_order, title, description) values
+  ('mission-w42-01-o1', 'mission-w42-01', 1, 'Accept the hunting hypothesis', 'Confirm you''re ready to hunt from a hypothesis instead of an alert.'),
+  ('mission-w42-02-o1', 'mission-w42-02', 1, 'Recognize what a baseline would actually flag', 'Determine which observation deviates enough from baseline to be worth a closer look.'),
+  ('mission-w42-03-o1', 'mission-w42-03', 1, 'Order the hunt plan', 'Put the steps of a real hunt plan in the correct order.'),
+  ('mission-w42-04-o1', 'mission-w42-04', 1, 'Spot the DNS anomaly', 'Determine which DNS pattern is worth pulling a thread on.'),
+  ('mission-w42-05-o1', 'mission-w42-05', 1, 'Identify the authentication anomaly', 'Determine which login is the anomaly worth pursuing.'),
+  ('mission-w42-05-o2', 'mission-w42-05', 2, 'Decide the next hunting move', 'Choose the correct next step once the anomaly is confirmed.'),
+  ('mission-w42-06-o1', 'mission-w42-06', 1, 'Locate the dormant foothold', 'Determine which host is actually holding a dormant foothold.'),
+  ('mission-w42-06-o2', 'mission-w42-06', 2, 'Explain why it was never caught', 'State why this foothold never triggered a single signature.'),
+  ('mission-w42-06-o3', 'mission-w42-06', 3, 'Close the hunt', 'Confirm the foothold and the explanation together.');
+
+insert into public.challenges (id, objective_id, sort_order, type, prompt, content, completion_conditions) values
+  ('mission-w42-01-o1-c1', 'mission-w42-01-o1', 1, 'story_dialogue', 'Confirm you''re ready to hunt.', '{"lines":[{"characterId":"luna","text":"No alert, just a hypothesis. Ready to go looking?"}]}'::jsonb, '{"acknowledged":true}'::jsonb),
+
+  ('mission-w42-02-o1-c1', 'mission-w42-02-o1', 1, 'investigation', 'Which of these would a baseline actually flag as worth a closer look?', '{"evidence":[{"id":"b1","label":"svchost.exe","detail":"Runs on 4,800 of 4,800 hosts -- completely ordinary Windows process"},{"id":"b2","label":"rundll32.exe with an unusual argument","detail":"Runs on 1 of 4,800 hosts, calling a DLL export that appears nowhere else in six months of history"},{"id":"b3","label":"chrome.exe","detail":"Runs on 4,650 of 4,800 hosts -- extremely common browser process"}],"question":"Which of these would a baseline actually flag as worth a closer look?"}'::jsonb, '{"requiredEvidenceIds":["b2"]}'::jsonb),
+
+  ('mission-w42-03-o1-c1', 'mission-w42-03-o1', 1, 'interactive_diagram', 'Put the steps of a real hunt plan in the correct order.', '{"hotspots":[{"id":"hypothesis","label":"Form a specific, testable hypothesis","explanation":"The starting point -- something you can actually prove or disprove, not a vague feeling."},{"id":"technique_source","label":"Pick the ATT&CK technique and data sources that would prove or disprove it","explanation":"Decide what evidence would actually settle the question."},{"id":"baseline","label":"Establish the baseline for that data source across the environment","explanation":"You can''t spot an outlier without knowing what normal looks like first."},{"id":"deviation","label":"Pull everything that deviates from baseline","explanation":"Surface the candidates that don''t match the established norm."},{"id":"triage","label":"Triage the deviations by hand, one at a time","explanation":"Every outlier still needs a human decision before it means anything."}],"task":"Put the steps of a real hunt plan in the correct order."}'::jsonb, '{"correctOrderIds":["hypothesis","technique_source","baseline","deviation","triage"]}'::jsonb),
+
+  ('mission-w42-04-o1-c1', 'mission-w42-04-o1', 1, 'investigation', 'Which DNS pattern is worth pulling a thread on?', '{"evidence":[{"id":"d1","label":"DNS query pattern A","detail":"Query to update-service.microsoft.com, resolved normally, queried by 1,200 hosts"},{"id":"d2","label":"DNS query pattern B","detail":"Query to a 32-character random-looking subdomain of a rarely-used TLD, made once every ten minutes by exactly one host, resolving to a different IP almost every time"},{"id":"d3","label":"DNS query pattern C","detail":"Query to an internal file server, resolved via internal DNS, queried by finance team hosts during business hours"}],"question":"Which DNS pattern is worth pulling a thread on?"}'::jsonb, '{"requiredEvidenceIds":["d2"]}'::jsonb),
+
+  ('mission-w42-05-o1-c1', 'mission-w42-05-o1', 1, 'investigation', 'Which login is the anomaly worth pursuing?', '{"evidence":[{"id":"a1","label":"Login A","detail":"Interactive login using a service account that has never authenticated interactively in eleven months of history, from a host it has never touched, at 02:14 local time"},{"id":"a2","label":"Login B","detail":"Standard interactive login by a human user from their assigned workstation during business hours"}],"question":"Which login is the anomaly worth pursuing?"}'::jsonb, '{"requiredEvidenceIds":["a1"]}'::jsonb),
+
+  ('mission-w42-05-o2-c1', 'mission-w42-05-o2', 1, 'multiple_choice', 'You''ve confirmed the anomaly. What''s the right next hunting move?', '{"question":"You''ve confirmed the anomaly. What''s the right next hunting move?","options":[{"id":"a","text":"Close the investigation -- one odd login isn''t enough"},{"id":"b","text":"Pivot from that account: pull everything else it touched around that timestamp, across every host and log source available"},{"id":"c","text":"Immediately disable the account with no further investigation"},{"id":"d","text":"Wait for a SIEM alert to confirm it independently"}]}'::jsonb, '{"correctOptionId":"b"}'::jsonb),
+
+  ('mission-w42-06-o1-c1', 'mission-w42-06-o1', 1, 'log_analysis', 'Across everything you''ve gathered, which host is actually holding a dormant foothold?', '{"logLines":[{"id":"g1","source":"Process","text":"A signed, legitimate-looking scheduled task binary on FOUNDRY-APP03 has not executed in four months, despite being registered to run weekly"},{"id":"g2","source":"Identity","text":"A service account tied to that scheduled task authenticated successfully once, four months ago, and has been completely silent since -- no failures, no further use, no alerts"},{"id":"g3","source":"DNS","text":"A single DNS lookup for a domain that has never resolved to anything, made once, four months ago, from FOUNDRY-APP03, never repeated"},{"id":"g4","source":"Baseline","text":"FOUNDRY-APP03 otherwise behaves identically to forty other application servers in its group"}],"question":"Across everything you''ve gathered, which host is actually holding a dormant foothold?"}'::jsonb, '{"requiredLogLineIds":["g1","g2","g3"]}'::jsonb),
+
+  ('mission-w42-06-o2-c1', 'mission-w42-06-o2', 1, 'multiple_choice', 'Why has this never triggered a single signature?', '{"question":"Why has this never triggered a single signature?","options":[{"id":"a","text":"Because it''s not actually there"},{"id":"b","text":"Because it did everything exactly once, months ago, and has been indistinguishable from silence ever since -- there was never a repeating pattern for a signature to match"},{"id":"c","text":"Because the SIEM is broken"},{"id":"d","text":"Because it uses a valid, signed binary, which is the only reason"}]}'::jsonb, '{"correctOptionId":"b"}'::jsonb),
+
+  ('mission-w42-06-o3-c1', 'mission-w42-06-o3', 1, 'boss_encounter', 'Confirm the foothold and the explanation together.', '{"stages":[{"objectiveRef":"mission-w42-06-o1","label":"The dormant foothold"},{"objectiveRef":"mission-w42-06-o2","label":"Why it was never caught"}],"task":"Confirm the foothold and the explanation together."}'::jsonb, '{"requiredObjectiveIds":["mission-w42-06-o1","mission-w42-06-o2"],"allCorrect":true}'::jsonb);
+
+insert into public.hints (challenge_id, tier, text, xp_cost, sort_order) values
+  ('mission-w42-01-o1-c1', 'orientation', 'There''s nothing to solve here -- just confirm you''re ready to continue.', 0, 1),
+
+  ('mission-w42-02-o1-c1', 'orientation', 'Ask how many hosts run each of these, and how often.', 15, 1),
+  ('mission-w42-02-o1-c1', 'concept', 'A baseline flags rarity combined with novelty -- something almost nobody does, doing something nobody else has ever done.', 25, 2),
+  ('mission-w42-02-o1-c1', 'solution', 'b2 is the anomaly: a single host, with an argument pattern seen nowhere else in six months. b1 and b3 are both extremely common, ordinary processes.', 35, 3),
+
+  ('mission-w42-03-o1-c1', 'orientation', 'Start from the question you''re trying to answer, not from the data itself.', 15, 1),
+  ('mission-w42-03-o1-c1', 'concept', 'You need to know what "normal" looks like before you can find what deviates from it, and every deviation still needs a human look before it means anything.', 25, 2),
+  ('mission-w42-03-o1-c1', 'solution', 'Hypothesis, then technique and data source, then baseline, then deviation, then manual triage -- in that order.', 35, 3),
+
+  ('mission-w42-04-o1-c1', 'orientation', 'Two of these three patterns have an ordinary explanation you could name in one sentence.', 15, 1),
+  ('mission-w42-04-o1-c1', 'concept', 'A domain that never resolves the same way twice, queried on a fixed interval by exactly one host, doesn''t look like anything a normal application does.', 25, 2),
+  ('mission-w42-04-o1-c1', 'solution', 'd2''s randomized subdomain, single-host querier and shifting resolution is the pattern worth pulling a thread on -- d1 and d3 are both ordinary, explainable traffic.', 35, 3),
+
+  ('mission-w42-05-o1-c1', 'orientation', 'One of these two logins breaks an eleven-month pattern. The other is exactly what you''d expect.', 15, 1),
+  ('mission-w42-05-o1-c1', 'solution', 'a1 is the anomaly: a service account authenticating interactively for the first time ever, from a new host, at an unusual hour.', 25, 2),
+
+  ('mission-w42-05-o2-c1', 'orientation', 'Think about what one login actually proves, and what it doesn''t.', 15, 1),
+  ('mission-w42-05-o2-c1', 'solution', 'A single anomaly is a thread, not a conclusion -- pivot from the account to see everything else it touched around that timestamp. Option b.', 25, 2),
+
+  ('mission-w42-06-o1-c1', 'orientation', 'Three of these four observations point at the same host. One is there to reassure you nothing''s wrong.', 15, 1),
+  ('mission-w42-06-o1-c1', 'concept', 'A dormant scheduled task, a service account used exactly once, and a DNS lookup that never repeated are all pointing at the same machine.', 25, 2),
+  ('mission-w42-06-o1-c1', 'tool_direction', 'Check which host each piece of evidence actually names.', 35, 3),
+  ('mission-w42-06-o1-c1', 'near_solution', 'g1, g2 and g3 all name FOUNDRY-APP03. g4 is the baseline comparison saying the host looks normal on the surface -- which is exactly the problem.', 45, 4),
+  ('mission-w42-06-o1-c1', 'solution', 'FOUNDRY-APP03 is the dormant foothold -- the scheduled task (g1), the once-used service account (g2), and the single unrepeated DNS lookup (g3) all point to the same host, despite it otherwise blending in with forty peers (g4).', 55, 5),
+
+  ('mission-w42-06-o2-c1', 'orientation', 'Ask what a signature actually needs in order to match something.', 15, 1),
+  ('mission-w42-06-o2-c1', 'solution', 'A signature needs a repeating pattern to match against. Something that happened exactly once, months ago, and then went silent never gave one -- that''s option b.', 25, 2),
+
+  ('mission-w42-06-o3-c1', 'orientation', 'You''ve already found the host and the reason -- bring both together.', 20, 1),
+  ('mission-w42-06-o3-c1', 'concept', 'Closing this out means naming the specific host and explaining, in plain terms, why six months of monitoring missed it.', 30, 2),
+  ('mission-w42-06-o3-c1', 'tool_direction', 'Name the host and its evidence first, then the one-time-only nature of its activity.', 40, 3),
+  ('mission-w42-06-o3-c1', 'near_solution', 'FOUNDRY-APP03, holding a foothold built from a task, an account and a DNS lookup that each fired exactly once -- nothing repeating for a signature to catch.', 50, 4),
+  ('mission-w42-06-o3-c1', 'solution', 'The dormant foothold is on FOUNDRY-APP03: a scheduled task, a service account, and a DNS lookup that each activated exactly once, four months ago, then went completely silent. It was never caught because a signature needs a repeating pattern, and this foothold never gave it one -- it did everything once and waited.', 65, 5);
