@@ -20,3 +20,19 @@ insert into public.missions (
   ('mission-w60-05', 'world-60', 'campaign-60a', 'operation-60a-2', 'proof-without-a-payload', 'Proof Without a Payload', 'A proof of impact doesn''t need to do anything destructive. It only needs to prove control-flow was hijacked, precisely and reproducibly.', 'intermediate', ARRAY['ava'], '{"requiredMissionIds":["mission-w60-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"non-destructive-poc-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w60-06', 'world-60', 'campaign-60a', 'operation-60a-2', 'zero-day-boss', 'Zero Day', 'Build a non-destructive proof that demonstrates real impact, then validate that the vendor''s fix actually closes the path.', 'boss', ARRAY['zayn', 'ava', 'byte', 'cipher'], '{"requiredMissionIds":["mission-w60-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"zero-day-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["zero-day"],"skillXp":{"programming":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w60-01', 1, 'cipher', 'This environment is sealed. Nothing built here leaves it. That''s not a suggestion -- it''s the only way I''m allowing this to happen at all.'),
+  ('mission-w60-01', 2, 'ava', 'This flaw was first observed months ago. Whoever found it first never escalated it responsibly. We''re not repeating that mistake.'),
+  ('mission-w60-01', 3, 'cipher', 'Understand it completely. Prove it safely. Then hand it to the people who can actually fix it.'),
+  ('mission-w60-02', 1, 'zayn', 'At the exact instant of a crash, the debugger freezes every register in place. Read them right, and they tell you exactly what just happened.'),
+  ('mission-w60-03', 1, 'byte', 'A calling convention is an agreement -- which register or stack slot holds which argument. Break that agreement on purpose, and you start controlling the call itself.'),
+  ('mission-w60-04', 1, 'zayn', 'NX means injected shellcode won''t run. ROP means you don''t need to inject anything -- you chain together fragments of code the binary already contains.'),
+  ('mission-w60-05', 1, 'ava', 'A proof of impact proves control was hijacked. It doesn''t need to do anything destructive to prove that.'),
+  ('mission-w60-06', 1, 'cipher', 'Build the proof. Precise, reproducible, and it does nothing but demonstrate the hijack.'),
+  ('mission-w60-06', 2, 'byte', '...Proof built. Control-flow redirected to a benign marker function, cleanly, every time, with zero payload beyond that.'),
+  ('mission-w60-06', 3, 'ava', 'Now validate the fix. Does the vendor patch actually close this, or just make it harder to trigger?'),
+  ('mission-w60-06', 4, 'zayn', 'Patched build tested against the same proof. Bounds check now rejects the oversized header before the copy ever happens. Confirmed closed.'),
+  ('mission-w60-06', 5, 'cipher', 'One more thing you should know. The crash that started this whole investigation wasn''t found by a person.'),
+  ('mission-w60-06', 6, 'byte', 'Then who -- or what -- found it?'),
+  ('mission-w60-06', 7, 'cipher', 'Automated test generation. Associated with Sentinel-X. It''s been finding bugs like this for a long time, on its own.');
+
