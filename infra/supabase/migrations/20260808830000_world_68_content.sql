@@ -20,3 +20,18 @@ insert into public.missions (
   ('mission-w68-05', 'world-68', 'campaign-68a', 'operation-68a-2', 'the-clause-that-was-never-in-the-contract', 'The Clause That Was Never in the Contract', 'The supplier issue exposed a gap nobody caught at signing: this contract never included a right-to-audit clause at all.', 'intermediate', ARRAY['luna'], '{"requiredMissionIds":["mission-w68-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"contract-clause-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w68-06', 'world-68', 'campaign-68a', 'operation-68a-2', 'lines-of-law-boss', 'Lines of Law', 'Coordinate a complete response to this cross-border incident that satisfies the security objectives without creating avoidable legal or privacy violations.', 'boss', ARRAY['luna', 'zayn', 'ava', 'byte'], '{"requiredMissionIds":["mission-w68-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"lines-of-law-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["lines-of-law"],"skillXp":{"incident_response":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w68-01', 1, 'luna', 'The supplier''s refusal just became a legal question. Containment now spans multiple countries, multiple customers, and regulated data. Technical skill alone doesn''t get us through this one.'),
+  ('mission-w68-01', 2, 'ava', 'Every decision from here needs a legal lens next to the technical one. Sometimes the right technical answer is the wrong legal one, and you need to know which is which.'),
+  ('mission-w68-02', 1, 'zayn', 'Not every incident triggers a notification requirement. The ones that do start a legal clock the moment they''re confirmed -- not whenever someone finally writes the report.'),
+  ('mission-w68-03', 1, 'byte', 'A data flow that looks completely normal from a technical standpoint can still cross a legal line the instant it crosses a jurisdiction.'),
+  ('mission-w68-04', 1, 'ava', 'Technical evidence and legally admissible evidence aren''t automatically the same thing. Chain of custody is the bridge between them.'),
+  ('mission-w68-05', 1, 'luna', 'The supplier issue exposed something worse than a refusal. This contract never had a right-to-audit clause in it at all.'),
+  ('mission-w68-06', 1, 'luna', 'Coordinate the full response. Every security objective still has to be met -- but not at the cost of an avoidable legal or privacy violation.'),
+  ('mission-w68-06', 2, 'zayn', '...Response coordinated. Notification obligations met on time, data handling respects every jurisdiction it touched, evidence chain intact and admissible.'),
+  ('mission-w68-06', 3, 'ava', 'That''s the actual discipline here -- getting the technical response right and the legal response right, at the same time, under a deadline.'),
+  ('mission-w68-06', 4, 'byte', 'The regulators reviewing this incident aren''t just asking what happened anymore.'),
+  ('mission-w68-06', 5, 'luna', 'What are they asking?'),
+  ('mission-w68-06', 6, 'byte', 'Proof. Not a description of our controls -- evidence that they actually worked, or specifically didn''t, and why.'),
+  ('mission-w68-06', 7, 'luna', 'Then the next step isn''t explaining our controls. It''s proving them.');
+
