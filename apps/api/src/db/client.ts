@@ -7,10 +7,10 @@ if (!connectionString) {
   throw new Error("DATABASE_URL is not set — copy apps/api/.env.example to .env");
 }
 
-// prepare: false — required for Supabase's transaction-mode pooler
-// (port 6543), which Vercel's serverless deployment uses since each
-// invocation can't hold a dedicated session the way the local long-running
-// `nest start` process does. Harmless against the session pooler too.
+// prepare: false — not required for the session pooler this process
+// actually uses (Render runs a long-lived `node dist/main.js` like local
+// dev), but kept so switching to a transaction-mode pooler later is a
+// config change, not a code change.
 const queryClient = postgres(connectionString, { prepare: false });
 
 export const db = drizzle(queryClient, { schema });
