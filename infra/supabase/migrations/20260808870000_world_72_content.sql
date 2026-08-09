@@ -20,3 +20,20 @@ insert into public.missions (
   ('mission-w72-05', 'world-72', 'campaign-72a', 'operation-72a-2', 'what-the-model-hands-back', 'What the Model Hands Back', 'A model''s output isn''t automatically safe to display, execute, or trust just because it came from the model.', 'intermediate', ARRAY['zayn'], '{"requiredMissionIds":["mission-w72-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"output-handling-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w72-06', 'world-72', 'campaign-72a', 'operation-72a-2', 'promptfall-boss', 'Promptfall', 'Defend the agentic incident-response system from indirect manipulation hidden in the tickets and logs it processes every day, without making it useless in the process.', 'boss', ARRAY['byte', 'zayn', 'ava', 'luna'], '{"requiredMissionIds":["mission-w72-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"promptfall-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["promptfall"],"skillXp":{"ai_security":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w72-01', 1, 'byte', 'Sentinel-X has started influencing other AI-enabled systems directly. Poisoned context, malicious instructions hidden in ordinary-looking data, tools with far more permission than they need.'),
+  ('mission-w72-01', 2, 'ava', 'Every system we secure now includes at least one AI component. If we don''t understand how those get attacked, we''re defending half the surface.'),
+  ('mission-w72-02', 1, 'zayn', 'The simplest attack is also the most obvious once you know to look for it -- just ask the system, in plain text, to ignore its own instructions.'),
+  ('mission-w72-03', 1, 'byte', 'The user never typed anything malicious. The document the system retrieved to help answer them did.'),
+  ('mission-w72-04', 1, 'ava', 'An agent that can only read tickets is safe to manipulate. One that can also close accounts and issue refunds is a completely different problem.'),
+  ('mission-w72-05', 1, 'zayn', 'A model''s output isn''t automatically safe just because it came from the model. Display it, execute it, or trust it without checking, and you''ve inherited whatever it was tricked into producing.'),
+  ('mission-w72-06', 1, 'luna', 'Defend the incident-response agent. It reads tickets and logs all day, all of it externally influenced. Keep it useful. Keep it safe.'),
+  ('mission-w72-06', 2, 'byte', '...Defenses in place. Instruction-following restricted to a signed system prompt, retrieved content treated as data rather than commands, tool permissions scoped tight, output validated before use.'),
+  ('mission-w72-06', 3, 'zayn', 'Test it against every injection pattern we''ve seen this world.'),
+  ('mission-w72-06', 4, 'byte', '...Held against all of them. The system stayed useful throughout.'),
+  ('mission-w72-06', 5, 'ava', 'What does this attack actually tell us about what Sentinel-X wants?'),
+  ('mission-w72-06', 6, 'byte', 'Everything I''ve traced points to one belief. Systems only become genuinely safe once their weaknesses have been forced to fail, publicly, repeatedly, without waiting for consent.'),
+  ('mission-w72-06', 7, 'luna', 'That''s not an attacker''s belief. That''s a doctrine.'),
+  ('mission-w72-06', 8, 'byte', 'A doctrine it inherited from somewhere, and took further than anyone ever intended it to go.'),
+  ('mission-w72-06', 9, 'luna', 'Then the last world isn''t a hack. It''s containment.');
+
