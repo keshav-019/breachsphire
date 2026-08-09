@@ -1,7 +1,9 @@
 import { cn } from "@/lib/utils";
+import { getCharacterProfile } from "@/lib/characters";
 
 export type CharacterAvatarProps = {
   tag: string;
+  characterId?: string;
   size?: "sm" | "md" | "lg" | "xl";
   tone?: "signal" | "telemetry" | "threat";
   online?: boolean;
@@ -23,21 +25,34 @@ const tones = {
 
 export function CharacterAvatar({
   tag,
+  characterId,
   size = "md",
   tone = "telemetry",
   online,
   className,
 }: CharacterAvatarProps) {
+  const avatarUrl = characterId ? getCharacterProfile(characterId).avatarUrl : undefined;
+
   return (
     <span className={cn("relative inline-flex shrink-0", className)}>
       <span
         className={cn(
-          "corner-cut grid place-items-center border border-border bg-gradient-to-br font-display tracking-widest",
+          "corner-cut grid place-items-center overflow-hidden border border-border bg-gradient-to-br font-display tracking-widest",
           sizes[size],
           tones[tone],
         )}
       >
-        {tag.slice(0, 2).toUpperCase()}
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={`${tag} avatar`}
+            className="h-full w-full object-cover"
+            decoding="async"
+            loading="lazy"
+          />
+        ) : (
+          tag.slice(0, 2).toUpperCase()
+        )}
       </span>
       {online && (
         <span className="absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-telemetry" />

@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 
 export type DialogueBoxProps = {
   speaker: string;
+  characterId?: string;
   role?: string;
   line: string;
   tone?: "signal" | "telemetry" | "threat";
@@ -11,6 +12,7 @@ export type DialogueBoxProps = {
 
 export function DialogueBox({
   speaker,
+  characterId,
   role,
   line,
   tone = "telemetry",
@@ -19,7 +21,13 @@ export function DialogueBox({
   return (
     <div className={cn("hud-panel corner-cut scanline relative p-4", className)}>
       <div className="flex items-center gap-3">
-        <CharacterAvatar tag={speaker} size="lg" tone={tone} online />
+        <CharacterAvatar
+          tag={speaker}
+          characterId={characterId}
+          size="lg"
+          tone={tone}
+          online
+        />
         <div className="min-w-0">
           <div className="font-display text-sm tracking-wide text-foreground uppercase">
             {speaker}
