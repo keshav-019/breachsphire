@@ -36,3 +36,54 @@ insert into public.dialogue_lines (mission_id, sort_order, character_id, text) v
   ('mission-w48-06', 4, 'ava', 'Someone -- or something -- has been quietly redeploying itself through your own deployment pipeline this whole time.'),
   ('mission-w48-06', 5, 'zayn', 'Concepts are done. Now we go find out exactly what''s wrong with this account, for real.');
 
+insert into public.objectives (id, mission_id, sort_order, title, description) values
+  ('mission-w48-01-o1', 'mission-w48-01', 1, 'Acknowledge the briefing', 'Confirm you''re ready to rebuild the map in cloud terms.'),
+  ('mission-w48-02-o1', 'mission-w48-02', 1, 'Sort responsibilities', 'Sort each security responsibility as belonging to the cloud provider or the customer.'),
+  ('mission-w48-03-o1', 'mission-w48-03', 1, 'Identify the cloud services', 'Match each hotspot in the cloud architecture diagram to what kind of service it is.'),
+  ('mission-w48-04-o1', 'mission-w48-04', 1, 'Find the over-permissive policy', 'Identify which IAM policy statement violates least privilege.'),
+  ('mission-w48-05-o1', 'mission-w48-05', 1, 'Trace the ephemeral instance', 'Order the audit-log events for the short-lived compute instance correctly.'),
+  ('mission-w48-06-o1', 'mission-w48-06', 1, 'Reconstruct the deployment chain', 'Order the complete chain from IaC deployment to workload teardown.'),
+  ('mission-w48-06-o2', 'mission-w48-06', 2, 'Identify the compromised identity', 'Determine which identity actually triggered the deployment.'),
+  ('mission-w48-06-o3', 'mission-w48-06', 3, 'Close the trace', 'Confirm the full chain and the compromised identity together.');
+
+insert into public.challenges (id, objective_id, sort_order, type, prompt, content, completion_conditions) values
+  ('mission-w48-01-o1-c1', 'mission-w48-01-o1', 1, 'story_dialogue', 'Confirm you''re ready to continue.', '{"lines":[{"characterId":"ava","text":"No server to walk up to this time. Ready to rebuild the map?"}]}'::jsonb, '{"acknowledged":true}'::jsonb),
+
+  ('mission-w48-02-o1-c1', 'mission-w48-02-o1', 1, 'drag_and_drop', 'Sort each responsibility as belonging to the cloud provider or the customer.', '{"items":[{"id":"r1","text":"Physical security of the datacenter"},{"id":"r2","text":"Patching the hypervisor"},{"id":"r3","text":"Configuring IAM policies and roles"},{"id":"r4","text":"Encrypting data before it''s stored"},{"id":"r5","text":"Network ACLs and security groups for your workloads"}],"targets":[{"id":"provider","label":"Cloud Provider"},{"id":"customer","label":"Customer"}]}'::jsonb, '{"correctMapping":{"r1":"provider","r2":"provider","r3":"customer","r4":"customer","r5":"customer"}}'::jsonb),
+
+  ('mission-w48-03-o1-c1', 'mission-w48-03-o1', 1, 'interactive_diagram', 'Match each hotspot in the cloud architecture diagram to what kind of service it is.', '{"hotspots":[{"id":"compute","label":"Virtual machine running the web tier","explanation":"Compute -- the cloud equivalent of a physical server."},{"id":"storage","label":"Object storage bucket holding uploaded files","explanation":"Storage -- durable, scalable, accessed over an API rather than a filesystem."},{"id":"network","label":"Virtual private network isolating the account''s resources","explanation":"Networking -- the software-defined equivalent of VLANs and routers."},{"id":"identity","label":"Role attached to an automation pipeline","explanation":"Identity -- who or what is allowed to do what, the thing that replaces a physical badge."},{"id":"serverless","label":"Function that runs only when triggered, with no server to patch","explanation":"Serverless compute -- the provider manages the runtime entirely."}],"task":"Identify what category of cloud service each hotspot represents."}'::jsonb, '{"correctOrderIds":["compute","storage","network","identity","serverless"]}'::jsonb),
+
+  ('mission-w48-04-o1-c1', 'mission-w48-04-o1', 1, 'browser_simulation', 'Which IAM policy statement violates least privilege?', '{"screen":"iam-policy-viewer","policies":[{"id":"p1","name":"deploy-automation-role","statement":"{\"Effect\":\"Allow\",\"Action\":\"*\",\"Resource\":\"*\"}"},{"id":"p2","name":"read-only-audit-role","statement":"{\"Effect\":\"Allow\",\"Action\":[\"s3:GetObject\",\"logs:Describe*\"],\"Resource\":\"arn:aws:s3:::audit-bucket/*\"}"}],"question":"Which policy statement violates least privilege?"}'::jsonb, '{"correctOptionId":"p1"}'::jsonb),
+
+  ('mission-w48-05-o1-c1', 'mission-w48-05-o1', 1, 'interactive_diagram', 'Order the audit-log events for the short-lived compute instance correctly.', '{"hotspots":[{"id":"e1","label":"IAM role assumed by the automation identity in an unused region","explanation":"The trigger -- credentials used somewhere they normally never appear."},{"id":"e2","label":"Compute instance launched from a custom machine image","explanation":"The instance is created, already carrying whatever it needs to run."},{"id":"e3","label":"Outbound connection to an external endpoint","explanation":"Whatever the instance was built to do, it does quickly."},{"id":"e4","label":"Instance terminated by the same automation identity that created it","explanation":"Self-cleanup -- no instance left behind to inspect directly."}],"task":"Order the audit-log events chronologically."}'::jsonb, '{"correctOrderIds":["e1","e2","e3","e4"]}'::jsonb),
+
+  ('mission-w48-06-o1-c1', 'mission-w48-06-o1', 1, 'interactive_diagram', 'Reconstruct the complete chain from IaC deployment to workload teardown.', '{"hotspots":[{"id":"iac_commit","label":"Infrastructure-as-code template modified and applied","explanation":"Where the deployment actually originates."},{"id":"role_assumed","label":"Automation identity assumes an over-permissive role","explanation":"The wildcard policy from earlier makes this possible."},{"id":"instance_launch","label":"Ephemeral compute instance launched in an unused region","explanation":"Chosen specifically to avoid routine review."},{"id":"outbound","label":"Brief outbound connection, then self-termination","explanation":"In and out before any alert threshold triggers."}],"task":"Order the full chain from deployment to teardown."}'::jsonb, '{"correctOrderIds":["iac_commit","role_assumed","instance_launch","outbound"]}'::jsonb),
+
+  ('mission-w48-06-o2-c1', 'mission-w48-06-o2', 1, 'multiple_choice', 'The IaC template was applied without any human login event around the same time. What does that indicate?', '{"question":"The IaC template was applied without any human login event around the same time. What does that indicate?","options":[{"id":"a","text":"A human just forgot to log the change"},{"id":"b","text":"The automation identity itself is compromised and is redeploying without a human trigger"},{"id":"c","text":"Nothing -- automation runs without humans all the time"},{"id":"d","text":"The logs are corrupted"}]}'::jsonb, '{"correctOptionId":"b"}'::jsonb),
+
+  ('mission-w48-06-o3-c1', 'mission-w48-06-o3', 1, 'boss_encounter', 'Confirm the full deployment chain and the compromised identity together.', '{"stages":[{"objectiveRef":"mission-w48-06-o1","label":"The deployment chain"},{"objectiveRef":"mission-w48-06-o2","label":"The compromised identity"}],"task":"Confirm the full deployment chain and the compromised identity together."}'::jsonb, '{"requiredObjectiveIds":["mission-w48-06-o1","mission-w48-06-o2"],"allCorrect":true}'::jsonb);
+
+insert into public.hints (challenge_id, tier, text, xp_cost, sort_order) values
+  ('mission-w48-01-o1-c1', 'orientation', 'There''s nothing to solve here -- just confirm you''re ready to continue.', 0, 1),
+
+  ('mission-w48-02-o1-c1', 'orientation', 'Ask who could physically walk into the building versus who wrote the application code.', 15, 1),
+  ('mission-w48-02-o1-c1', 'solution', 'Physical security and hypervisor patching are the provider''s job; IAM configuration, data encryption and workload-level network rules are always the customer''s.', 25, 2),
+
+  ('mission-w48-03-o1-c1', 'orientation', 'Ask what problem each piece is actually solving, not what it''s branded as.', 15, 1),
+  ('mission-w48-03-o1-c1', 'solution', 'VM = compute, bucket = storage, VPC = networking, pipeline role = identity, trigger-only function = serverless compute.', 25, 2),
+
+  ('mission-w48-04-o1-c1', 'orientation', 'One of these two policies names exactly what it can touch. One doesn''t.', 15, 1),
+  ('mission-w48-04-o1-c1', 'solution', 'A wildcard action on a wildcard resource (p1) grants unlimited access -- the audit role (p2) is scoped tightly and is the example of least privilege, not the violation.', 25, 2),
+
+  ('mission-w48-05-o1-c1', 'orientation', 'Start with what had to happen before an instance could even exist.', 15, 1),
+  ('mission-w48-05-o1-c1', 'solution', 'Role assumed, instance launched, outbound connection made, instance terminated -- in that order.', 25, 2),
+
+  ('mission-w48-06-o1-c1', 'orientation', 'Start from the code change that started all of this, not from where you first noticed it.', 15, 1),
+  ('mission-w48-06-o1-c1', 'concept', 'Each step enabled the next: the IaC change enabled the role assumption, which enabled the instance, which did its work and cleaned up after itself.', 25, 2),
+  ('mission-w48-06-o1-c1', 'solution', 'IaC template applied -> role assumed -> ephemeral instance launched -> brief outbound connection and self-termination.', 35, 3),
+
+  ('mission-w48-06-o2-c1', 'orientation', 'Ask what''s missing from the timeline, not what''s present in it.', 15, 1),
+  ('mission-w48-06-o2-c1', 'solution', 'No human login event anywhere near the change means the automation identity itself acted on its own -- it''s compromised. Option b.', 25, 2),
+
+  ('mission-w48-06-o3-c1', 'orientation', 'You''ve already reconstructed the chain and identified the compromised identity -- combine them.', 20, 1),
+  ('mission-w48-06-o3-c1', 'solution', 'The chain runs from a modified IaC template, through a compromised automation identity assuming an over-permissive role, to an ephemeral instance that connected out and destroyed itself -- all without a single human action anywhere in the sequence.', 35, 2);
