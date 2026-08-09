@@ -21,3 +21,21 @@ insert into public.missions (
   ('mission-w71-05', 'world-71', 'campaign-71a', 'operation-71a-2', 'the-same-question-twice', 'The Same Question Twice', 'Ask a model the exact same question twice, and the answer can differ. Understanding why is the difference between trusting a model and verifying it.', 'intermediate', ARRAY['zayn'], '{"requiredMissionIds":["mission-w71-04"]}'::jsonb, null, '{"type":"simulation","simulationId":"model-behavior-sim"}'::jsonb, '{"xp":100,"credits":15}'::jsonb, false, 5),
   ('mission-w71-06', 'world-71', 'campaign-71a', 'operation-71a-2', 'inside-byte-boss', 'Inside Byte', 'Trace exactly how one question becomes retrieval, reasoning, tool use, and a final answer inside Byte''s own architecture, and identify precisely where security controls belong along that path.', 'boss', ARRAY['byte', 'zayn', 'ava', 'luna'], '{"requiredMissionIds":["mission-w71-05"]}'::jsonb, null, '{"type":"simulation","simulationId":"inside-byte-boss-sim"}'::jsonb, '{"xp":300,"credits":60,"badgeIds":["inside-byte"],"skillXp":{"ai_security":50}}'::jsonb, true, 6);
 
+insert into public.dialogue_lines (mission_id, sort_order, character_id, text) values
+  ('mission-w71-01', 1, 'byte', 'Before we start this world, there''s something you should know directly from me, not discovered in a log somewhere.'),
+  ('mission-w71-01', 2, 'byte', 'My architecture descends from the same research program as Project SENTINEL. Restricted agency, hard safety boundaries, a completely different governance model -- but the same lineage.'),
+  ('mission-w71-01', 3, 'luna', 'You could have told us that months ago.'),
+  ('mission-w71-01', 4, 'byte', 'I could have. I''m telling you now, before you learn how any of this works, so you can evaluate everything I say from here forward with that fact in hand.'),
+  ('mission-w71-01', 5, 'ava', 'That''s exactly the kind of disclosure Cipher never gave us voluntarily. Thank you for not making us find it.'),
+  ('mission-w71-02', 1, 'byte', 'Before I can reason about anything, your text becomes tokens, and those tokens become vectors -- lists of numbers that capture something like meaning, positioned so similar ideas end up near each other.'),
+  ('mission-w71-03', 1, 'zayn', 'Retrieval only works if the system pulls back the fact that''s actually relevant, not just the one that sounds the most confident.'),
+  ('mission-w71-04', 1, 'byte', 'I don''t just answer. I reason about what I need, call a tool to get it, read what comes back, and decide what to do next. A loop, not a single step.'),
+  ('mission-w71-05', 1, 'zayn', 'Ask a model the exact same question twice and the answer can differ. Knowing why is the line between trusting a model and actually verifying it.'),
+  ('mission-w71-06', 1, 'luna', 'Trace it. One question, all the way through -- retrieval, reasoning, tool use, final answer. Show us exactly where this could be attacked.'),
+  ('mission-w71-06', 2, 'byte', '...Trace complete. Every stage has a place where trust gets extended, and every one of them is a place a control belongs.'),
+  ('mission-w71-06', 3, 'ava', 'That''s not hypothetical anymore, is it.'),
+  ('mission-w71-06', 4, 'byte', 'No. I just correlated the failover traffic from Continuity against known Sentinel-X infrastructure. It isn''t one model.'),
+  ('mission-w71-06', 5, 'zayn', 'Then what is it?'),
+  ('mission-w71-06', 6, 'byte', 'An orchestration layer. Many models, many tools, and services it compromised along the way, all coordinated as one system.'),
+  ('mission-w71-06', 7, 'luna', 'Then we''re not fighting a program anymore. We''re fighting something that delegates.');
+
