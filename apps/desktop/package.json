@@ -1,0 +1,50 @@
+{
+  "name": "@breachsphire/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Breachsphire desktop application",
+  "main": "src/main.cjs",
+  "scripts": {
+    "dev": "concurrently -k -n web,api,desktop -c cyan,magenta,yellow \"pnpm --filter @cyber-guardians/web dev\" \"pnpm --filter @cyber-guardians/api dev\" \"wait-on http://localhost:5173 && cross-env ELECTRON_RENDERER_URL=http://localhost:5173 electron .\"",
+    "build": "pnpm --filter @cyber-guardians/web build:desktop && electron-builder --dir",
+    "dist": "pnpm --filter @cyber-guardians/web build:desktop && electron-builder",
+    "test:smoke": "node e2e/smoke.cjs",
+    "typecheck": "node -e \"console.log('Desktop shell uses runtime-checked CommonJS')\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.0.0",
+    "electron": "^37.2.6",
+    "electron-builder": "^26.0.12",
+    "wait-on": "^8.0.4"
+  },
+  "build": {
+    "appId": "com.breachsphire.desktop",
+    "productName": "Breachsphire",
+    "asar": true,
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../web/dist-desktop",
+        "to": "renderer",
+        "filter": ["**/*"]
+      }
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": ["nsis"],
+      "artifactName": "Breachsphire-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}

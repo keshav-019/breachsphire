@@ -13,6 +13,9 @@
     "typecheck": "turbo run typecheck",
     "dev:web": "pnpm --filter @cyber-guardians/web dev",
     "dev:api": "pnpm --filter @cyber-guardians/api dev",
+    "dev:desktop": "pnpm --filter @breachsphire/desktop dev",
+    "build:desktop": "pnpm --filter @breachsphire/desktop build",
+    "dist:desktop": "pnpm --filter @breachsphire/desktop dist",
     "vercel-build": "pnpm --filter @cyber-guardians/web build",
     "db:start": "supabase start --workdir infra",
     "db:stop": "supabase stop --workdir infra",
@@ -26,7 +29,8 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@nestjs/core",
-      "esbuild"
+      "esbuild",
+      "electron"
     ]
   }
 }
