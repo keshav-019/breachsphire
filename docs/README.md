@@ -18,3 +18,4 @@ the implementation does.
 11. [Business Model](./10-business-model.md)
 12. [Story Generation Prompt](./11-story-generation-prompt.md) — superseded, see 13
 13. [World Story & Campaign Bible](./12-world-story-bible.md)
+14. [Backend Engineering: Forge Lab](./14-backend-forge-lab.md)
