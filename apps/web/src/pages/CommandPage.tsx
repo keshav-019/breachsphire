@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Coins, Lock, Play, ShieldHalf, Skull, Zap } from "lucide-react";
 import { fetchMe, fetchWorlds, type World } from "@/lib/api";
 import { rankDisplay } from "@/lib/rank";
+import { usePathwayStore } from "@/store/pathway";
 import { StatTile } from "@/components/guardians/StatTile";
 import { ThreatLevelPill } from "@/components/guardians/ThreatLevelPill";
 import { XPBar } from "@/components/guardians/XPBar";
@@ -14,9 +15,25 @@ function findContinueWorld(worlds: World[]): World | null {
   return worlds.find((w) => w.state === "active") ?? worlds.find((w) => w.state === "unlocked") ?? null;
 }
 
+/** Purely flavor text for the footer -- keyed by pathway slug (not id, so
+ * it degrades gracefully if a pathway's id ever changes). */
+const PATHWAY_FLAVOR: Record<string, { division: string; node: string }> = {
+  "cyber-guardians": { division: "Ops Division", node: "Node 07" },
+  "backend-engineering": { division: "Forge Division", node: "Node 12" },
+  "ai-ml": { division: "Cipher Division", node: "Node 03" },
+};
+
 export default function CommandPage() {
+  const pathwayId = usePathwayStore((s) => s.selectedPathwayId)!;
+  const pathwaySlug = usePathwayStore((s) => s.selectedPathwaySlug);
+  const pathwayTitle = usePathwayStore((s) => s.selectedPathwayTitle);
+  const flavor = (pathwaySlug ? PATHWAY_FLAVOR[pathwaySlug] : undefined) ?? { division: "Ops Division", node: "Node 07" };
   const { data: me, isLoading: meLoading } = useQuery({ queryKey: ["me"], queryFn: fetchMe });
-  const { data: worlds, isLoading: worldsLoading, error } = useQuery({ queryKey: ["worlds"], queryFn: fetchWorlds });
+  const {
+    data: worlds,
+    isLoading: worldsLoading,
+    error,
+  } = useQuery({ queryKey: ["worlds", pathwayId], queryFn: () => fetchWorlds(pathwayId) });
 
   if (meLoading || worldsLoading) {
     return (
@@ -44,7 +61,9 @@ export default function CommandPage() {
   return (
     <div className="px-5 py-8">
       <div>
-        <span className="label-mono text-primary">Ops Division // Node 07</span>
+        <span className="label-mono text-primary">
+          {flavor.division} // {flavor.node}
+        </span>
         <h1 className="mt-2 text-3xl font-bold text-foreground sm:text-4xl">
           Welcome back, {me?.displayName ?? "Agent"}.
         </h1>
@@ -146,7 +165,9 @@ export default function CommandPage() {
 
       <footer className="mt-10 border-t border-border py-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <span className="label-mono">Cyber Guardians · Ops Division · Node 07</span>
+          <span className="label-mono">
+            {pathwayTitle ?? "Cyber Guardians"} · {flavor.division} · {flavor.node}
+          </span>
           <span className="label-mono text-telemetry">All systems nominal</span>
         </div>
       </footer>

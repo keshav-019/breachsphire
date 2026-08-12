@@ -3,14 +3,17 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Lock, Skull, Play } from "lucide-react";
 import { fetchWorlds, type World } from "@/lib/api";
+import { usePathwayStore } from "@/store/pathway";
 import { WorldNode } from "@/components/guardians/WorldNode";
 import { ThreatLevelPill } from "@/components/guardians/ThreatLevelPill";
 import { XPBar } from "@/components/guardians/XPBar";
 
 export default function MapPage() {
+  const pathwayId = usePathwayStore((s) => s.selectedPathwayId)!;
+  const pathwaySlug = usePathwayStore((s) => s.selectedPathwaySlug);
   const { data: worlds, isLoading, error } = useQuery({
-    queryKey: ["worlds"],
-    queryFn: fetchWorlds,
+    queryKey: ["worlds", pathwayId],
+    queryFn: () => fetchWorlds(pathwayId),
   });
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -125,8 +128,8 @@ export default function MapPage() {
           <div className="mt-6 space-y-3 border-t border-border/60 pt-5">
             {[
               { k: "Status", v: selected.state },
-              { k: "Operations", v: "8 missions · 3 drills" },
-              { k: "Reward track", v: "Cosmetic + skill node" },
+              { k: "Operations", v: pathwaySlug === "cyber-guardians" ? "Mission chain · boss protocol" : "12 missions · 1 boss" },
+              { k: "Reward track", v: pathwaySlug === "cyber-guardians" ? "Cosmetic + skill node" : "Skill XP + Act badge" },
             ].map((r) => (
               <div key={r.k} className="flex items-baseline justify-between gap-3">
                 <span className="label-mono">{r.k}</span>

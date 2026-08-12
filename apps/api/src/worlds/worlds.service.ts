@@ -50,7 +50,7 @@ export interface CampaignWithOperationsDto {
 
 @Injectable()
 export class WorldsService {
-  async listForPlayer(playerId: string): Promise<WorldDto[]> {
+  async listForPlayer(playerId: string, pathwayId: string): Promise<WorldDto[]> {
     const rows = await db
       .select({
         id: worlds.id,
@@ -70,6 +70,7 @@ export class WorldsService {
         playerWorldProgress,
         and(eq(playerWorldProgress.worldId, worlds.id), eq(playerWorldProgress.playerId, playerId)),
       )
+      .where(eq(worlds.pathwayId, pathwayId))
       .orderBy(worlds.index);
 
     return rows.map((row) => ({

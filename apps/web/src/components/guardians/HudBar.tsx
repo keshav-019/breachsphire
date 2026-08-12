@@ -4,10 +4,18 @@ import { Radar, Coins, Zap, LogOut } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { fetchMe } from "@/lib/api";
 import { rankDisplay } from "@/lib/rank";
+import { usePathwayStore } from "@/store/pathway";
+
+const PATHWAY_STATIONS: Record<string, string> = {
+  "cyber-guardians": "Ops Division // Node 07",
+  "backend-engineering": "Forge Division // Node 12",
+  "ai-ml": "Cipher Division // Node 03",
+};
 
 export function HudBar() {
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
+  const pathwaySlug = usePathwayStore((s) => s.selectedPathwaySlug);
   const navigate = useNavigate();
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: fetchMe });
 
@@ -38,9 +46,11 @@ export function HudBar() {
           </div>
           <div className="leading-none">
             <div className="font-display text-sm font-bold tracking-[0.22em] text-foreground uppercase">
-              Cyber Guardians
+              Breachsphire
             </div>
-            <div className="label-mono mt-1 whitespace-nowrap">Ops Division // Node 07</div>
+            <div className="label-mono mt-1 whitespace-nowrap">
+              {(pathwaySlug && PATHWAY_STATIONS[pathwaySlug]) ?? "Nexus // Pathway Registry"}
+            </div>
           </div>
         </Link>
 
