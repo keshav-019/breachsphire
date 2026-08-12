@@ -16,11 +16,25 @@ export type Difficulty =
 export type LabType = "simulation" | "shared_lab" | "isolated_lab" | "none";
 
 /**
- * The 11 Acts (0-10) from the World Story & Campaign Bible
- * (docs/12-world-story-bible.md §2). Each Act groups several Worlds.
+ * A top-level campaign track (Cyber Guardians, The Fracture, ...). Each
+ * pathway owns its own Acts/Worlds, scoped by `pathwayId`.
+ */
+export interface Pathway {
+  id: string;
+  slug: string;
+  title: string;
+  tagline: string;
+  description: string;
+  icon: string;
+}
+
+/**
+ * The Acts (0-indexed within their pathway) from that pathway's story
+ * bible. Each Act groups several Worlds.
  */
 export interface Act {
   id: string;
+  pathwayId: string;
   index: number;
   slug: string;
   title: string;
@@ -31,6 +45,7 @@ export interface Act {
 export interface World {
   id: string;
   actId: string;
+  pathwayId: string;
   index: number;
   slug: string;
   title: string;
@@ -71,7 +86,21 @@ export interface PrerequisiteRule {
   requiredSkill?: { track: SkillTrack; minLevel: number };
 }
 
-export type CharacterId = "ava" | "zayn" | "luna" | "byte" | "cipher" | "sentinel_x";
+export type CharacterId =
+  | "ava"
+  | "zayn"
+  | "luna"
+  | "byte"
+  | "cipher"
+  | "sentinel_x"
+  | "mira"
+  | "forge"
+  | "fracture"
+  | "maya"
+  | "arjun"
+  | "elena"
+  | "noah"
+  | "echo";
 
 export interface DialogueLine {
   characterId: CharacterId | "system";

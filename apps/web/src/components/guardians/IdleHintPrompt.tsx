@@ -8,6 +8,8 @@ type IdleHintPromptProps = {
   revealing?: boolean;
   onReveal: (tier: string) => void;
   onDismiss: () => void;
+  companionName?: string;
+  companionCharacterId?: string;
 };
 
 const TIER_NAME: Record<string, string> = {
@@ -23,6 +25,8 @@ export function IdleHintPrompt({
   revealing,
   onReveal,
   onDismiss,
+  companionName = "Byte",
+  companionCharacterId = "byte",
 }: IdleHintPromptProps) {
   const isSolution = hint.tier === "solution";
   const cost = hint.xpCost === 0 ? "This one is free." : "It costs " + hint.xpCost + " XP.";
@@ -35,7 +39,7 @@ export function IdleHintPrompt({
       className="corner-cut border border-primary/45 bg-primary/8 p-4 shadow-[0_0_30px_-18px_var(--color-primary)]"
     >
       <div className="flex items-start gap-3">
-        <CharacterAvatar tag="Byte" characterId="byte" size="md" tone="signal" online />
+        <CharacterAvatar tag={companionName} characterId={companionCharacterId} size="md" tone="signal" online />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />

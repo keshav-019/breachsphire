@@ -17,6 +17,14 @@ const CHARACTER_PROFILES: Record<string, CharacterProfile> = {
   cipher: { name: "Cipher", role: "Unknown" },
   sentinel_x: { name: "Sentinel-X", role: "???" },
   system: { name: "System", role: "Automated" },
+  mira: { name: "Mira Voss", role: "Chief Architect" },
+  forge: { name: "Forge", role: "Ops Assistant AI" },
+  fracture: { name: "The Fracture", role: "???" },
+  maya: { name: "Dr. Maya Sen", role: "Director, Cipher Division" },
+  arjun: { name: "Arjun Vale", role: "Data Engineer" },
+  elena: { name: "Dr. Elena Rook", role: "Research Scientist" },
+  noah: { name: "Noah Kim", role: "ML Platform Engineer" },
+  echo: { name: "Echo", role: "???" },
 };
 
 export function getCharacterProfile(characterId: string): CharacterProfile {

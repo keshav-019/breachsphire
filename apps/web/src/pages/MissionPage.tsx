@@ -17,6 +17,14 @@ import { ChallengeRenderer } from "@/components/guardians/challenges/ChallengeRe
 import { Button } from "@/components/ui/button";
 import { getCharacterProfile } from "@/lib/characters";
 import { useIdleHintPrompt } from "@/hooks/useIdleHintPrompt";
+import { usePathwayStore } from "@/store/pathway";
+
+/** Every pathway's own AI companion, keyed by slug -- used only as the
+ * fallback when a mission's cast has neither (e.g. a Mira-only mission). */
+const PATHWAY_DEFAULT_COMPANION: Record<string, string> = {
+  "cyber-guardians": "byte",
+  "backend-engineering": "forge",
+};
 
 export default function MissionPage() {
   const { missionId } = useParams<{ missionId: string }>();
@@ -46,6 +54,17 @@ export default function MissionPage() {
     challengeId: currentChallengeId,
     enabled: canOfferIdleHint,
   });
+  // Only ever attribute the "AI companion" panel to an actual AI character
+  // (Byte for Cyber Guardians, Forge for The Fracture) -- never to a human
+  // mentor like Ava/Mira just because they happen to be first in the cast.
+  // Falls back to the *current pathway's* companion, not a hardcoded one --
+  // plenty of missions (e.g. Mira-only ones) never mention Forge by name.
+  const pathwaySlug = usePathwayStore((s) => s.selectedPathwaySlug);
+  const AI_COMPANION_IDS = ["byte", "forge"];
+  const defaultCompanionId = (pathwaySlug && PATHWAY_DEFAULT_COMPANION[pathwaySlug]) || "byte";
+  const companionCharacterId =
+    mission?.characterIds.find((id) => AI_COMPANION_IDS.includes(id)) ?? defaultCompanionId;
+  const companionName = getCharacterProfile(companionCharacterId).name;
 
   useEffect(() => {
     setAutoOpenHintTier(null);
@@ -191,6 +210,8 @@ export default function MissionPage() {
                   revealing={hintMutation.isPending}
                   onReveal={handleHintReveal}
                   onDismiss={idleHintPrompt.dismiss}
+                  companionName={companionName}
+                  companionCharacterId={companionCharacterId}
                 />
               )}
               {lastResult && !lastResult.correct && (
@@ -233,7 +254,7 @@ export default function MissionPage() {
           <div className="hud-panel corner-cut p-4">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-clearance" />
-              <span className="label-mono text-clearance">Byte · AI companion</span>
+              <span className="label-mono text-clearance">{companionName} · AI companion</span>
             </div>
             <div className="mt-3 border border-clearance/30 bg-clearance/8 p-3 text-xs leading-relaxed text-foreground">
               {mission.description}

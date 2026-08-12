@@ -451,7 +451,10 @@ export class MissionsService {
           set: { state: "cleared", completion: 100, updatedAt: new Date() },
         });
 
-      const [nextWorld] = await tx.select().from(worlds).where(eq(worlds.index, world.index + 1));
+      const [nextWorld] = await tx
+        .select()
+        .from(worlds)
+        .where(and(eq(worlds.index, world.index + 1), eq(worlds.pathwayId, world.pathwayId)));
       if (nextWorld) {
         const [existingNext] = await tx
           .select()
