@@ -1,4 +1,4 @@
-# Cyber Guardians
+# Breachsphire
 
 A story-driven cybersecurity learning game. Players join a futuristic
 cybersecurity organization, get sent on missions, investigate incidents, and
@@ -34,6 +34,26 @@ pnpm dev
 
 Or run one side at a time: `pnpm dev:web` / `pnpm dev:api`.
 
+### Desktop
+
+```bash
+pnpm dev:desktop      # local web + API + Electron shell
+pnpm build:desktop    # unpacked app in apps/desktop/dist/win-unpacked
+pnpm dist:desktop     # Windows installer in apps/desktop/dist
+```
+
+The packaged app uses the same Supabase account and deployed API as the web
+application, so progress remains synchronized. See
+[Forge Lab & desktop architecture](./docs/14-backend-forge-lab.md).
+
+## Current implementation
+
+The authenticated Cybersecurity and 32-Act Backend Engineering pathways are
+implemented against Supabase/PostgreSQL. Forge Lab adds 12 system-design
+briefs, five portfolio campaigns, and Java/Spring, Python/FastAPI, and Go
+specializations with persisted progress. The Electron shell packages the same
+experience for Windows.
+
 ## Testing
 
 `apps/web` has a Playwright e2e suite that runs against the real dev servers
@@ -55,14 +75,11 @@ pnpm test:e2e:ui              # interactive UI mode
 
 ## Status
 
-Phase 1 is mostly in place: monorepo, shared mission/player type schema, the
-full HQ/World Map/Mission/Profile/Leaderboard/Achievements UI in `apps/web`,
-and real authentication (Supabase — sign up, log in, log out, protected
-routes, a server-side session guard in `apps/api`). Game data (XP, missions,
-worlds, leaderboard) is still mocked — the actual mission engine, labs, and
-Phaser scenes aren't built yet. See
-[Development Phases & MVP Scope](./docs/09-development-phases.md) for the
-build order and current status in detail.
+The mission engine, pathway selection, progression data, Forge Lab, and
+desktop shell are implemented. Remaining roadmap work includes real sandboxed
+labs, richer achievements/leaderboards, content administration, publisher
+signing, and a hosted desktop-download surface. See
+[Development Phases & MVP Scope](./docs/09-development-phases.md).
 
 ## Repo layout
 
