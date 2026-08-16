@@ -100,7 +100,17 @@ export type CharacterId =
   | "arjun"
   | "elena"
   | "noah"
-  | "echo";
+  | "echo"
+  | "imani"
+  | "tomas"
+  | "lin"
+  | "sera"
+  | "substrate"
+  | "leena"
+  | "vey"
+  | "cross"
+  | "rook"
+  | "warden";
 
 export interface DialogueLine {
   characterId: CharacterId | "system";
