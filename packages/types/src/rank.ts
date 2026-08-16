@@ -88,6 +88,8 @@ export const SKILL_TRACKS = [
   "ai_safety_evaluation",
   "mlops",
   "responsible_ai",
+  "robotics_fundamentals",
+  "cloud_devops_fundamentals",
 ] as const;
 
 export type SkillTrack = (typeof SKILL_TRACKS)[number];
