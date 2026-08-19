@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { BookOpenCheck, ChevronDown, Lightbulb, Lock } from "lucide-react";
+import { BookOpenCheck, ChevronDown, Lightbulb, Lock, Unlock } from "lucide-react";
 import type { SolutionContext } from "./SolutionWalkthrough";
 import { cn } from "@/lib/utils";
 
@@ -66,18 +66,8 @@ export function HintPanel({
       <div className="flex items-center gap-2">
         <Lightbulb className="h-4 w-4 text-primary" />
         <span className="label-mono text-primary">Mission support</span>
-        <span className="label-mono ml-auto">costs XP</span>
-      </div>
-
-      <div className="mt-3 flex items-center gap-3 border border-border/70 bg-surface-raised/35 px-3 py-2">
-        <div className="h-1.5 flex-1 overflow-hidden bg-muted">
-          <div
-            className="h-full bg-primary transition-[width]"
-            style={{ width: hints.length ? (revealedCount / hints.length) * 100 + "%" : "0%" }}
-          />
-        </div>
-        <span className="font-mono text-[0.65rem] text-muted-foreground">
-          {revealedCount}/{hints.length} revealed
+        <span className="label-mono ml-auto">
+          {revealedCount}/{hints.length}
         </span>
       </div>
 
@@ -87,6 +77,36 @@ export function HintPanel({
           const priorUnrevealed = hints.slice(0, index).some((prior) => !prior.revealed);
           const canReveal = !hint.revealed && !priorUnrevealed;
           const isSolution = hint.tier === "solution";
+          const isDecrypting = revealing && canReveal;
+
+          // The one tier the player can actually act on right now gets a
+          // big, unmistakable "Unlock hint" button instead of blending
+          // into the list -- everything else (already revealed, or still
+          // genuinely locked behind an earlier tier) stays lower-key.
+          if (canReveal) {
+            return (
+              <li key={hint.tier} data-testid={"hint-tier-" + hint.tier}>
+                <button
+                  type="button"
+                  disabled={isDecrypting}
+                  onClick={() => onReveal?.(hint.tier)}
+                  className="glow-signal corner-cut flex w-full items-center justify-center gap-2 bg-primary px-4 py-3 font-display text-sm tracking-[0.08em] text-primary-foreground uppercase transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {isDecrypting ? (
+                    "Decrypting…"
+                  ) : (
+                    <>
+                      <Unlock className="h-4 w-4" />
+                      Unlock hint
+                      <span className="font-mono text-xs normal-case opacity-85">
+                        ({TIER_LABEL[hint.tier] ?? hint.tier}{hint.xpCost > 0 ? ` · -${hint.xpCost} XP` : ", free"})
+                      </span>
+                    </>
+                  )}
+                </button>
+              </li>
+            );
+          }
 
           return (
             <li
@@ -95,23 +115,19 @@ export function HintPanel({
               className={cn(
                 "border bg-surface-raised/40",
                 isSolution ? "border-primary/35" : "border-border/70",
+                !hint.revealed && "opacity-50",
               )}
             >
               <button
                 type="button"
                 aria-expanded={hint.revealed ? open : undefined}
-                disabled={!hint.revealed && priorUnrevealed}
+                disabled={!hint.revealed}
                 onClick={() => {
-                  if (hint.revealed) {
-                    setOpenTier(open ? null : hint.tier);
-                  } else {
-                    onReveal?.(hint.tier);
-                  }
+                  if (hint.revealed) setOpenTier(open ? null : hint.tier);
                 }}
                 className={cn(
                   "flex w-full items-center gap-2 px-3 py-2.5 text-left",
-                  !hint.revealed && priorUnrevealed && "cursor-not-allowed opacity-50",
-                  canReveal && "hover:bg-primary/7",
+                  !hint.revealed && "cursor-not-allowed",
                 )}
               >
                 {isSolution ? (
@@ -125,13 +141,7 @@ export function HintPanel({
                   {TIER_LABEL[hint.tier] ?? hint.tier}
                 </span>
                 <span className="font-mono ml-auto text-[0.65rem] text-primary">
-                  {hint.revealed
-                    ? "revealed"
-                    : revealing && canReveal
-                      ? "decrypting…"
-                      : hint.xpCost === 0
-                        ? "free"
-                        : "-" + hint.xpCost + " XP"}
+                  {hint.revealed ? "revealed" : "locked"}
                 </span>
                 {hint.revealed && (
                   <ChevronDown
