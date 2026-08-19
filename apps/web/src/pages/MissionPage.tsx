@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Lightbulb, Sparkles, XCircle } from "lucide-react";
+import { CheckCircle2, Lightbulb, Lock, Sparkles, XCircle } from "lucide-react";
 import {
   fetchMissionDetail,
   revealHint,
@@ -179,7 +179,18 @@ export default function MissionPage() {
 
         {/* CENTER — the challenge itself */}
         <div className="hud-panel corner-cut flex min-h-[420px] flex-col justify-center p-6">
-          {mission.status === "available" && !startMutation.isSuccess ? (
+          {mission.status === "locked" ? (
+            <div className="mx-auto max-w-sm space-y-4 text-center">
+              <Lock className="mx-auto h-10 w-10 text-muted-foreground" />
+              <h2 className="font-display text-lg text-foreground">Mission locked</h2>
+              <p className="text-sm text-muted-foreground">
+                Clear the prior mission in this world first to unlock this one.
+              </p>
+              <Button asChild variant="outline">
+                <Link to={`/worlds/${mission.worldId}`}>Return to missions</Link>
+              </Button>
+            </div>
+          ) : mission.status === "available" && !startMutation.isSuccess ? (
             <div className="mx-auto max-w-sm space-y-4 text-center">
               <p className="text-sm text-muted-foreground">
                 Briefing received. Start the mission to begin.
