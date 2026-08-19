@@ -9,7 +9,7 @@ import {
   submitAttempt,
   type AttemptResult,
 } from "@/lib/api";
-import { DialogueBox } from "@/components/guardians/DialogueBox";
+import { ChatDialogue } from "@/components/guardians/ChatDialogue";
 import { ObjectiveChecklist, type Objective } from "@/components/guardians/ObjectiveChecklist";
 import { HintPanel } from "@/components/guardians/HintPanel";
 import { IdleHintPrompt } from "@/components/guardians/IdleHintPrompt";
@@ -160,18 +160,9 @@ export default function MissionPage() {
       <div className="grid flex-1 gap-4 p-4 lg:grid-cols-[300px_1fr_300px]">
         {/* LEFT — story + objectives */}
         <div className="space-y-4">
-          {mission.storyDialogue.map((line, i) => {
-            const info = getCharacterProfile(line.characterId);
-            return (
-              <DialogueBox
-                key={i}
-                speaker={info.name}
-                characterId={line.characterId}
-                role={info.role}
-                line={line.text}
-              />
-            );
-          })}
+          {mission.storyDialogue.length > 0 && (
+            <ChatDialogue key={mission.id} lines={mission.storyDialogue} />
+          )}
           <div className="hud-panel corner-cut p-4">
             <ObjectiveChecklist objectives={objectives} />
           </div>
