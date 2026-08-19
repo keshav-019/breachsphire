@@ -33,6 +33,10 @@ export default function MissionPage() {
   const queryClient = useQueryClient();
   const [lastResult, setLastResult] = useState<AttemptResult | null>(null);
   const [autoOpenHintTier, setAutoOpenHintTier] = useState<string | null>(null);
+  // Shown inline right where the player just got a wrong answer, so
+  // "want a hint?" is answered on the spot instead of sending them
+  // hunting for the sidebar panel.
+  const [justRevealedHint, setJustRevealedHint] = useState<{ tier: string; text: string } | null>(null);
   // Below `lg` the 3-column layout collapses to a single stacked column, and
   // the hints panel -- last in DOM order -- ends up hundreds of pixels below
   // the fold, past the story dialogue, objectives and the challenge itself.
@@ -93,6 +97,7 @@ export default function MissionPage() {
   useEffect(() => {
     setAutoOpenHintTier(null);
     setLastResult(null);
+    setJustRevealedHint(null);
   }, [currentChallengeId]);
 
   useEffect(() => {
@@ -108,8 +113,9 @@ export default function MissionPage() {
 
   const hintMutation = useMutation({
     mutationFn: (tier: string) => revealHint(currentChallengeId!, tier),
-    onSuccess: async (_hint, tier) => {
+    onSuccess: async (hint, tier) => {
       setAutoOpenHintTier(tier);
+      setJustRevealedHint({ tier: hint.tier, text: hint.text });
       await invalidateMission();
     },
   });
@@ -241,9 +247,39 @@ export default function MissionPage() {
                 />
               )}
               {lastResult && !lastResult.correct && (
-                <div className="mx-auto flex max-w-sm items-center gap-2 border border-threat/50 bg-threat/10 p-3 text-sm text-threat">
-                  <XCircle className="h-4 w-4 shrink-0" />
-                  Not quite. Check the hints if you're stuck.
+                <div className="mx-auto flex max-w-sm flex-col gap-3 border border-threat/50 bg-threat/10 p-4">
+                  <div className="flex items-center justify-center gap-2 text-sm text-threat">
+                    <XCircle className="h-4 w-4 shrink-0" />
+                    Not quite.
+                  </div>
+                  {justRevealedHint && (
+                    <div className="border-t border-threat/30 pt-3 text-left">
+                      <span className="label-mono text-primary">Hint unlocked</span>
+                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                        {justRevealedHint.text}
+                      </p>
+                    </div>
+                  )}
+                  {nextHint && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={hintMutation.isPending}
+                      onClick={() => handleHintReveal(nextHint.tier)}
+                      className="mx-auto"
+                    >
+                      <Lightbulb className="h-3.5 w-3.5" />
+                      {hintMutation.isPending
+                        ? "Decrypting…"
+                        : justRevealedHint
+                          ? nextHint.xpCost > 0
+                            ? `Want another hint? (-${nextHint.xpCost} XP)`
+                            : "Want another hint?"
+                          : nextHint.xpCost > 0
+                            ? `Want a hint? (-${nextHint.xpCost} XP)`
+                            : "Want a hint?"}
+                    </Button>
+                  )}
                 </div>
               )}
               {lastResult?.correct && !lastResult.missionCompleted && (

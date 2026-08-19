@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { loginAsTestUser } from "./helpers";
 
 type DialogueLine = {
@@ -69,8 +69,8 @@ async function openMockMission(page: Page, payload: ReturnType<typeof missionPay
   await expect(page.getByText("Portrait Check", { exact: true })).toBeVisible();
 }
 
-async function expectLoadedPortrait(page: Page, name: string, assetName: string) {
-  const portrait = page.getByRole("img", { name: `${name} avatar` });
+async function expectLoadedPortrait(page: Page, name: string, assetName: string, scope?: Locator) {
+  const portrait = (scope ?? page).getByRole("img", { name: `${name} avatar` });
 
   await expect(portrait).toBeVisible();
   await expect(portrait).toHaveAttribute(
@@ -87,7 +87,7 @@ test.describe("character portraits", () => {
     await loginAsTestUser(page);
   });
 
-  test("renders the correct portrait for every Guardian in the requested worlds", async ({ page }) => {
+  test("renders the correct portrait for whoever is currently speaking as the player taps through the scene", async ({ page }) => {
     await openMockMission(
       page,
       missionPayload({
@@ -100,10 +100,21 @@ test.describe("character portraits", () => {
       }),
     );
 
-    await expectLoadedPortrait(page, "Ava", "ava");
-    await expectLoadedPortrait(page, "Zayn", "zayn");
-    await expectLoadedPortrait(page, "Luna", "luna");
-    await expectLoadedPortrait(page, "Byte", "byte");
+    const stage = page.getByTestId("dialogue-stage");
+    const currentSpeaker = page.getByTestId("dialogue-current-speaker");
+
+    // Only the first line is shown until the player taps through -- the
+    // scene plays like a mobile visual-novel stage, one portrait at a time.
+    await expectLoadedPortrait(page, "Ava", "ava", currentSpeaker);
+
+    await stage.click();
+    await expectLoadedPortrait(page, "Zayn", "zayn", currentSpeaker);
+
+    await stage.click();
+    await expectLoadedPortrait(page, "Luna", "luna", currentSpeaker);
+
+    await stage.click();
+    await expectLoadedPortrait(page, "Byte", "byte", currentSpeaker);
   });
 
   test("shows a character portrait inside story-dialogue challenges", async ({ page }) => {
@@ -127,8 +138,9 @@ test.describe("character portraits", () => {
       }),
     );
 
-    await expect(page.getByText("System", { exact: true })).toBeVisible();
-    await expect(page.getByText("SY", { exact: true })).toBeVisible();
+    const currentSpeaker = page.getByTestId("dialogue-current-speaker");
+    await expect(currentSpeaker.getByText("System", { exact: true })).toBeVisible();
+    await expect(currentSpeaker.getByText("SY", { exact: true })).toBeVisible();
     await expect(page.getByRole("img", { name: "System avatar" })).toHaveCount(0);
   });
 });

@@ -76,6 +76,7 @@ export function ChatDialogue({ lines, onComplete, className }: ChatDialogueProps
 
   return (
     <div
+      data-testid="dialogue-stage"
       className={cn("mx-auto flex w-full max-w-xl cursor-pointer flex-col items-center", className)}
       onClick={handleTap}
       role="button"
@@ -85,7 +86,7 @@ export function ChatDialogue({ lines, onComplete, className }: ChatDialogueProps
       }}
     >
       {speaker && (
-        <div className="flex flex-col items-center">
+        <div data-testid="dialogue-current-speaker" className="flex flex-col items-center">
           <CharacterAvatar
             key={latestLine!.characterId}
             tag={speaker.name}
@@ -101,7 +102,7 @@ export function ChatDialogue({ lines, onComplete, className }: ChatDialogueProps
         </div>
       )}
 
-      <div className="mt-5 flex w-full flex-col gap-3">
+      <div data-testid="dialogue-transcript" className="mt-5 flex w-full flex-col gap-3">
         {lines.slice(0, revealedCount).map((line, i) => {
           const tone = toneMapRef.current.get(line.characterId) ?? "signal";
           const isLatest = i === revealedCount - 1;
@@ -126,6 +127,7 @@ export function ChatDialogue({ lines, onComplete, className }: ChatDialogueProps
           {revealedCount}/{lines.length}
         </span>
         <span
+          data-testid="dialogue-advance-prompt"
           className={cn(
             "label-mono pulse-ring ml-2 flex items-center gap-1 rounded-full px-3 py-1.5",
             hasMore ? "bg-surface-raised text-foreground" : "bg-primary/15 text-primary",
