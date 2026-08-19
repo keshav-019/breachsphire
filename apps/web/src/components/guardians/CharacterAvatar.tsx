@@ -8,6 +8,10 @@ export type CharacterAvatarProps = {
   tone?: "signal" | "telemetry" | "threat";
   online?: boolean;
   className?: string;
+  /** "corner-cut" (default) matches the HUD square-badge look used
+   * everywhere else; "circle" is for chat-style contexts (e.g. the
+   * mission dialogue thread) where a round avatar reads correctly. */
+  shape?: "corner-cut" | "circle";
 };
 
 const sizes = {
@@ -30,6 +34,7 @@ export function CharacterAvatar({
   tone = "telemetry",
   online,
   className,
+  shape = "corner-cut",
 }: CharacterAvatarProps) {
   const avatarUrl = characterId ? getCharacterProfile(characterId).avatarUrl : undefined;
 
@@ -37,7 +42,8 @@ export function CharacterAvatar({
     <span className={cn("relative inline-flex shrink-0", className)}>
       <span
         className={cn(
-          "corner-cut grid place-items-center overflow-hidden border border-border bg-gradient-to-br font-display tracking-widest",
+          "grid place-items-center overflow-hidden border border-border bg-gradient-to-br font-display tracking-widest",
+          shape === "circle" ? "rounded-full" : "corner-cut",
           sizes[size],
           tones[tone],
         )}
