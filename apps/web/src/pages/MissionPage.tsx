@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Sparkles, XCircle } from "lucide-react";
+import { CheckCircle2, Lightbulb, Sparkles, XCircle } from "lucide-react";
 import {
   fetchMissionDetail,
   revealHint,
@@ -15,6 +15,8 @@ import { HintPanel } from "@/components/guardians/HintPanel";
 import { IdleHintPrompt } from "@/components/guardians/IdleHintPrompt";
 import { ChallengeRenderer } from "@/components/guardians/challenges/ChallengeRenderer";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 import { getCharacterProfile } from "@/lib/characters";
 import { useIdleHintPrompt } from "@/hooks/useIdleHintPrompt";
 import { usePathwayStore } from "@/store/pathway";
@@ -31,6 +33,12 @@ export default function MissionPage() {
   const queryClient = useQueryClient();
   const [lastResult, setLastResult] = useState<AttemptResult | null>(null);
   const [autoOpenHintTier, setAutoOpenHintTier] = useState<string | null>(null);
+  // Below `lg` the 3-column layout collapses to a single stacked column, and
+  // the hints panel -- last in DOM order -- ends up hundreds of pixels below
+  // the fold, past the story dialogue, objectives and the challenge itself.
+  // A floating trigger + sheet keeps hints reachable in one tap regardless
+  // of scroll position or viewport width.
+  const [hintSheetOpen, setHintSheetOpen] = useState(false);
 
   const missionQuery = useQuery({
     queryKey: ["mission", missionId],
@@ -46,6 +54,17 @@ export default function MissionPage() {
   const currentChallenge = currentObjective?.challenges[0] ?? null;
   const currentChallengeId = currentChallenge?.id;
   const nextHint = currentChallenge?.hints.find((hint) => !hint.revealed) ?? null;
+  const hasHints = Boolean(currentChallenge && currentChallenge.hints.length > 0);
+  const revealedHintCount = currentChallenge?.hints.filter((hint) => hint.revealed).length ?? 0;
+  const hintContext = currentChallenge
+    ? {
+        challengePrompt: currentChallenge.prompt,
+        challengeType: currentChallenge.type,
+        objectiveTitle: currentObjective?.title,
+        missionTitle: mission?.title ?? "",
+        missionDescription: mission?.description ?? "",
+      }
+    : undefined;
   const canOfferIdleHint =
     mission?.status === "in_progress" &&
     currentChallenge?.type !== "story_dialogue" &&
@@ -234,20 +253,15 @@ export default function MissionPage() {
 
         {/* RIGHT — hints, companion */}
         <div className="space-y-4">
-          {currentChallenge && currentChallenge.hints.length > 0 && (
+          {hasHints && (
             <HintPanel
-              key={currentChallenge.id}
-              hints={currentChallenge.hints}
+              key={currentChallenge!.id}
+              hints={currentChallenge!.hints}
               revealing={hintMutation.isPending}
               autoOpenTier={autoOpenHintTier}
-              context={{
-                challengePrompt: currentChallenge.prompt,
-                challengeType: currentChallenge.type,
-                objectiveTitle: currentObjective?.title,
-                missionTitle: mission.title,
-                missionDescription: mission.description,
-              }}
+              context={hintContext}
               onReveal={handleHintReveal}
+              className="hidden lg:block"
             />
           )}
 
@@ -262,6 +276,47 @@ export default function MissionPage() {
           </div>
         </div>
       </div>
+
+      {/* Below `lg` the panel above is hidden (layout collapses to one
+          column and it would otherwise land far below the fold) -- this
+          floating trigger keeps hints reachable in one tap no matter the
+          scroll position or screen width. */}
+      {hasHints && (
+        <Sheet open={hintSheetOpen} onOpenChange={setHintSheetOpen}>
+          <button
+            type="button"
+            onClick={() => setHintSheetOpen(true)}
+            data-testid="mobile-hint-trigger"
+            className={cn(
+              "corner-cut glow-signal fixed right-4 bottom-24 z-40 flex items-center gap-2 bg-primary px-4 py-3 font-display text-xs tracking-[0.1em] text-primary-foreground uppercase lg:hidden",
+              nextHint && "pulse-ring",
+            )}
+          >
+            <Lightbulb className="h-4 w-4" />
+            Hints
+            {currentChallenge && (
+              <span className="font-mono text-[0.65rem] opacity-80">
+                {revealedHintCount}/{currentChallenge.hints.length}
+              </span>
+            )}
+          </button>
+          <SheetContent side="bottom" className="hud-panel max-h-[85vh] overflow-y-auto border-t border-border">
+            <SheetHeader>
+              <SheetTitle className="font-display text-primary">Mission support</SheetTitle>
+            </SheetHeader>
+            {currentChallenge && (
+              <HintPanel
+                hints={currentChallenge.hints}
+                revealing={hintMutation.isPending}
+                autoOpenTier={autoOpenHintTier}
+                context={hintContext}
+                onReveal={handleHintReveal}
+                className="mt-4"
+              />
+            )}
+          </SheetContent>
+        </Sheet>
+      )}
     </div>
   );
 }
