@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Map, Radar, Crosshair, Trophy, Medal, UserRound, Waypoints, Anvil, BrainCircuit } from "lucide-react";
+import { Map, Radar, Trophy, Medal, UserRound, Waypoints, Anvil, BrainCircuit } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { HudBar } from "./HudBar";
 import { SystemStatus } from "../SystemStatus";
@@ -7,10 +7,14 @@ import { usePathwayStore } from "@/store/pathway";
 
 type NavItem = { to: string; label: string; icon: LucideIcon };
 
+// "Mission" used to be a standalone nav item pointing at `/mission`, but
+// missions only ever exist at `/mission/:missionId` -- there is no
+// "current mission" concept to link to without an id, so that route never
+// matched anything and rendered a blank page. Reach missions from World Map
+// or Command instead.
 export const NAV_ITEMS: NavItem[] = [
   { to: "/", label: "Command", icon: Radar },
   { to: "/map", label: "World Map", icon: Map },
-  { to: "/mission", label: "Mission", icon: Crosshair },
   { to: "/pathways", label: "Pathways", icon: Waypoints },
   { to: "/profile", label: "Dossier", icon: UserRound },
   { to: "/leaderboard", label: "Standings", icon: Trophy },
@@ -25,7 +29,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     ? { to: "/forge", label: "Cipher Lab", icon: BrainCircuit }
     : { to: "/forge", label: "Forge Lab", icon: Anvil };
   const navItems = hasLab
-    ? [...NAV_ITEMS.slice(0, 3), labItem, ...NAV_ITEMS.slice(3)]
+    ? [...NAV_ITEMS.slice(0, 2), labItem, ...NAV_ITEMS.slice(2)]
     : NAV_ITEMS;
   const mobileLabels = hasLab
     ? new Set(["Command", "World Map", labItem.label, "Pathways", "Dossier"])

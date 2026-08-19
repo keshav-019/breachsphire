@@ -95,22 +95,14 @@ export default function App() {
                   <Suspense fallback={<RouteFallback />}>
                     <Routes>
                       <Route path="/pathways" element={<PathwaySelectPage />} />
-                      <Route
-                        path="/"
-                        element={
-                          <RequirePathway>
-                            <CommandPage />
-                          </RequirePathway>
-                        }
-                      />
-                      <Route
-                        path="/map"
-                        element={
-                          <RequirePathway>
-                            <MapPage />
-                          </RequirePathway>
-                        }
-                      />
+                      {/* Command and World Map no longer hard-redirect when no
+                          pathway is selected -- each renders its own in-page
+                          picker (see NoPathwaySelected in each file) so landing
+                          here directly never looks like an empty, redirecting
+                          page. RequirePathway still guards /worlds/:worldId,
+                          which has no meaningful standalone content. */}
+                      <Route path="/" element={<CommandPage />} />
+                      <Route path="/map" element={<MapPage />} />
                       <Route
                         path="/worlds/:worldId"
                         element={
