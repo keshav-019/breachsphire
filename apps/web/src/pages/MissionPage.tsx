@@ -39,6 +39,11 @@ export default function MissionPage() {
   // A floating trigger + sheet keeps hints reachable in one tap regardless
   // of scroll position or viewport width.
   const [hintSheetOpen, setHintSheetOpen] = useState(false);
+  // The mission's opening scene plays as a visual-novel-style stage in the
+  // center panel; once the player taps through every line it clears and
+  // the actual task (start-gate / challenge / complete screen) takes over
+  // that same space. Resets whenever a different mission loads.
+  const [showStory, setShowStory] = useState(true);
 
   const missionQuery = useQuery({
     queryKey: ["mission", missionId],
@@ -89,6 +94,10 @@ export default function MissionPage() {
     setAutoOpenHintTier(null);
     setLastResult(null);
   }, [currentChallengeId]);
+
+  useEffect(() => {
+    setShowStory(Boolean(mission && mission.storyDialogue.length > 0));
+  }, [mission?.id]);
 
   const invalidateMission = () => queryClient.invalidateQueries({ queryKey: ["mission", missionId] });
 
@@ -157,20 +166,16 @@ export default function MissionPage() {
         {mission.isBoss && <span className="label-mono text-threat">Boss</span>}
       </div>
 
-      <div className="grid flex-1 gap-4 p-4 lg:grid-cols-[300px_1fr_300px]">
-        {/* LEFT — story + objectives */}
-        <div className="space-y-4">
-          {mission.storyDialogue.length > 0 && (
-            <ChatDialogue key={mission.id} lines={mission.storyDialogue} />
-          )}
-          <div className="hud-panel corner-cut p-4">
-            <ObjectiveChecklist objectives={objectives} />
-          </div>
-        </div>
-
-        {/* CENTER — the challenge itself */}
+      <div className="grid flex-1 gap-4 p-4 lg:grid-cols-[1fr_320px]">
+        {/* CENTER — the opening scene, then the task itself */}
         <div className="hud-panel corner-cut flex min-h-[420px] flex-col justify-center p-6">
-          {mission.status === "locked" ? (
+          {showStory && mission.storyDialogue.length > 0 ? (
+            <ChatDialogue
+              key={mission.id}
+              lines={mission.storyDialogue}
+              onComplete={() => setShowStory(false)}
+            />
+          ) : mission.status === "locked" ? (
             <div className="mx-auto max-w-sm space-y-4 text-center">
               <Lock className="mx-auto h-10 w-10 text-muted-foreground" />
               <h2 className="font-display text-lg text-foreground">Mission locked</h2>
@@ -253,8 +258,12 @@ export default function MissionPage() {
           )}
         </div>
 
-        {/* RIGHT — hints, companion */}
+        {/* RIGHT — objectives, hints, companion */}
         <div className="space-y-4">
+          <div className="hud-panel corner-cut p-4">
+            <ObjectiveChecklist objectives={objectives} />
+          </div>
+
           {hasHints && (
             <HintPanel
               key={currentChallenge!.id}

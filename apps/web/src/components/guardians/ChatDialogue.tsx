@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { ChevronDown, MessageCircle } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { ArrowRight, ChevronDown, MessageCircle } from "lucide-react";
 import { CharacterAvatar } from "./CharacterAvatar";
 import { getCharacterProfile } from "@/lib/characters";
 import { cn } from "@/lib/utils";
@@ -11,124 +11,138 @@ export type DialogueLine = {
 
 export type ChatDialogueProps = {
   lines: DialogueLine[];
+  /** Called once, the moment the player taps past the final line -- the
+   * caller is expected to clear this component from view and show the
+   * actual task/challenge in its place. */
+  onComplete: () => void;
   className?: string;
 };
 
-type Side = "left" | "right";
+type Tone = "signal" | "telemetry" | "clearance";
+const TONE_CYCLE: Tone[] = ["signal", "telemetry", "clearance"];
 
-/** First distinct speaker gets the left side, second gets the right, and
- * it cycles from there -- keeps a two-character back-and-forth reading
- * clearly, and stays stable for longer casts instead of assigning sides
- * randomly per line. */
-function buildSideMap(lines: DialogueLine[]): Map<string, Side> {
-  const map = new Map<string, Side>();
-  let next: Side = "left";
+/** Stable per-character accent so a multi-character conversation stays
+ * readable without needing a left/right chat-app layout -- first speaker
+ * encountered gets the first tone, second gets the next, cycling. */
+function buildToneMap(lines: DialogueLine[]): Map<string, Tone> {
+  const map = new Map<string, Tone>();
+  let i = 0;
   for (const line of lines) {
     if (!map.has(line.characterId)) {
-      map.set(line.characterId, next);
-      next = next === "left" ? "right" : "left";
+      map.set(line.characterId, TONE_CYCLE[i % TONE_CYCLE.length]!);
+      i += 1;
     }
   }
   return map;
 }
 
-/**
- * Renders a mission's opening story beat as a WhatsApp-style chat thread:
- * one bubble per line, each character's portrait beside their message,
- * revealed one tap at a time rather than dumped on screen all at once.
- */
-export function ChatDialogue({ lines, className }: ChatDialogueProps) {
-  const [revealedCount, setRevealedCount] = useState(() => (lines.length > 0 ? 1 : 0));
-  const threadRef = useRef<HTMLDivElement>(null);
-  const sideMapRef = useRef(buildSideMap(lines));
+const TONE_TEXT: Record<Tone, string> = {
+  signal: "text-primary",
+  telemetry: "text-telemetry",
+  clearance: "text-clearance",
+};
 
-  useEffect(() => {
-    threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: "smooth" });
-  }, [revealedCount]);
+const TONE_AVATAR: Record<Tone, "signal" | "telemetry" | "threat"> = {
+  signal: "signal",
+  telemetry: "telemetry",
+  clearance: "threat",
+};
+
+/**
+ * Mission opening scene, presented like a mobile visual-novel stage: one
+ * large portrait for whoever is currently speaking, centered, with the
+ * transcript building downward underneath as the player taps through it
+ * one line at a time. Once every line has been shown, the final tap
+ * hands off to `onComplete` instead of revealing anything further.
+ */
+export function ChatDialogue({ lines, onComplete, className }: ChatDialogueProps) {
+  const [revealedCount, setRevealedCount] = useState(() => Math.min(1, lines.length));
+  const toneMapRef = useRef(useMemo(() => buildToneMap(lines), [lines]));
 
   if (lines.length === 0) return null;
 
   const hasMore = revealedCount < lines.length;
+  const latestLine = lines[revealedCount - 1];
+  const speaker = latestLine ? getCharacterProfile(latestLine.characterId) : null;
+  const speakerTone = latestLine ? (toneMapRef.current.get(latestLine.characterId) ?? "signal") : "signal";
 
-  function advance() {
-    setRevealedCount((count) => Math.min(count + 1, lines.length));
+  function handleTap() {
+    if (hasMore) {
+      setRevealedCount((count) => Math.min(count + 1, lines.length));
+    } else {
+      onComplete();
+    }
   }
 
   return (
     <div
-      className={cn("hud-panel corner-cut relative overflow-hidden", className)}
-      onClick={hasMore ? advance : undefined}
-      role={hasMore ? "button" : undefined}
-      tabIndex={hasMore ? 0 : undefined}
-      onKeyDown={
-        hasMore
-          ? (e) => {
-              if (e.key === "Enter" || e.key === " ") advance();
-            }
-          : undefined
-      }
+      className={cn("mx-auto flex w-full max-w-xl cursor-pointer flex-col items-center", className)}
+      onClick={handleTap}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") handleTap();
+      }}
     >
-      <div className="flex items-center gap-2 border-b border-border/60 px-4 py-2.5">
-        <MessageCircle className="h-3.5 w-3.5 text-primary" />
-        <span className="label-mono text-primary">Comms</span>
-      </div>
-
-      <div ref={threadRef} className="max-h-[420px] space-y-3 overflow-y-auto px-4 py-4">
-        {lines.slice(0, revealedCount).map((line, i) => (
-          <ChatBubble
-            key={i}
-            line={line}
-            side={sideMapRef.current.get(line.characterId) ?? "left"}
-            isNewest={i === revealedCount - 1}
+      {speaker && (
+        <div className="flex flex-col items-center">
+          <CharacterAvatar
+            key={latestLine!.characterId}
+            tag={speaker.name}
+            characterId={latestLine!.characterId}
+            size="2xl"
+            tone={TONE_AVATAR[speakerTone]}
+            className="animate-in fade-in zoom-in-95 duration-300"
           />
-        ))}
-      </div>
-
-      {hasMore && (
-        <div className="flex items-center justify-between border-t border-border/60 px-4 py-2.5">
-          <span className="label-mono">
-            {revealedCount}/{lines.length}
-          </span>
-          <span className="label-mono pulse-ring flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-primary">
-            Tap to continue
-            <ChevronDown className="h-3 w-3" />
-          </span>
+          <div className={cn("mt-3 font-display text-lg tracking-wide uppercase", TONE_TEXT[speakerTone])}>
+            {speaker.name}
+          </div>
+          {speaker.role && <div className="label-mono mt-0.5">{speaker.role}</div>}
         </div>
       )}
-    </div>
-  );
-}
 
-function ChatBubble({ line, side, isNewest }: { line: DialogueLine; side: Side; isNewest: boolean }) {
-  const profile = getCharacterProfile(line.characterId);
-  const isLeft = side === "left";
+      <div className="mt-5 flex w-full flex-col gap-3">
+        {lines.slice(0, revealedCount).map((line, i) => {
+          const tone = toneMapRef.current.get(line.characterId) ?? "signal";
+          const isLatest = i === revealedCount - 1;
+          return (
+            <div
+              key={i}
+              className={cn(
+                "hud-panel corner-cut px-4 py-3 text-center",
+                isLatest && "animate-in fade-in slide-in-from-bottom-2 duration-300",
+              )}
+            >
+              <div className={cn("label-mono mb-1", TONE_TEXT[tone])}>{getCharacterProfile(line.characterId).name}</div>
+              <p className="text-sm leading-relaxed text-foreground">{line.text}</p>
+            </div>
+          );
+        })}
+      </div>
 
-  return (
-    <div
-      className={cn(
-        "flex items-end gap-2",
-        isLeft ? "flex-row" : "flex-row-reverse",
-        isNewest && "animate-in fade-in slide-in-from-bottom-2 duration-300",
-      )}
-    >
-      <CharacterAvatar
-        tag={profile.name}
-        characterId={line.characterId}
-        size="md"
-        shape="circle"
-        tone={isLeft ? "telemetry" : "signal"}
-        online
-      />
-      <div
-        className={cn(
-          "max-w-[78%] rounded-2xl border px-3.5 py-2.5",
-          isLeft
-            ? "rounded-bl-sm border-border bg-surface-raised/80"
-            : "rounded-br-sm border-primary/30 bg-primary/12",
-        )}
-      >
-        <div className={cn("label-mono mb-1", isLeft ? "text-telemetry" : "text-primary")}>{profile.name}</div>
-        <p className="text-sm leading-relaxed text-foreground">{line.text}</p>
+      <div className="mt-5 flex items-center gap-2">
+        <MessageCircle className="h-3.5 w-3.5 text-muted-foreground" />
+        <span className="label-mono">
+          {revealedCount}/{lines.length}
+        </span>
+        <span
+          className={cn(
+            "label-mono pulse-ring ml-2 flex items-center gap-1 rounded-full px-3 py-1.5",
+            hasMore ? "bg-surface-raised text-foreground" : "bg-primary/15 text-primary",
+          )}
+        >
+          {hasMore ? (
+            <>
+              Tap to continue
+              <ChevronDown className="h-3 w-3" />
+            </>
+          ) : (
+            <>
+              Continue
+              <ArrowRight className="h-3 w-3" />
+            </>
+          )}
+        </span>
       </div>
     </div>
   );

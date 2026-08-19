@@ -4,7 +4,7 @@ import { getCharacterProfile } from "@/lib/characters";
 export type CharacterAvatarProps = {
   tag: string;
   characterId?: string;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg" | "xl" | "2xl";
   tone?: "signal" | "telemetry" | "threat";
   online?: boolean;
   className?: string;
@@ -19,6 +19,7 @@ const sizes = {
   md: "h-10 w-10 text-xs",
   lg: "h-14 w-14 text-base",
   xl: "h-24 w-24 text-2xl",
+  "2xl": "h-36 w-36 text-4xl",
 } as const;
 
 const tones = {
