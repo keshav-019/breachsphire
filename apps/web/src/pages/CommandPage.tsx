@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Coins, Lock, Play, ShieldHalf, Skull, Zap } from "lucide-react";
-import { fetchMe, fetchWorlds, type World } from "@/lib/api";
+import { ChevronRight, Coins, Lock, Play, Satellite, ShieldHalf, Skull, Zap } from "lucide-react";
+import { fetchMe, fetchPathways, fetchWorlds, type World } from "@/lib/api";
 import { rankDisplay } from "@/lib/rank";
 import { usePathwayStore } from "@/store/pathway";
 import { StatTile } from "@/components/guardians/StatTile";
@@ -21,19 +21,87 @@ const PATHWAY_FLAVOR: Record<string, { division: string; node: string }> = {
   "cyber-guardians": { division: "Ops Division", node: "Node 07" },
   "backend-engineering": { division: "Forge Division", node: "Node 12" },
   "ai-ml": { division: "Cipher Division", node: "Node 03" },
+  "robotics-iot": { division: "Vector Division", node: "Node 19" },
+  "cloud-devops-sre": { division: "Atlas Division", node: "Node 24" },
 };
 
+/** Shown instead of a hard redirect when no pathway is selected yet. */
+function NoPathwaySelected() {
+  const navigate = useNavigate();
+  const setPathway = usePathwayStore((s) => s.setPathway);
+  const { data: pathways, isLoading, error } = useQuery({ queryKey: ["pathways"], queryFn: fetchPathways });
+
+  return (
+    <div className="px-5 py-8">
+      <span className="label-mono text-primary">Nexus // No Active Uplink</span>
+      <h1 className="mt-2 text-3xl font-bold text-foreground sm:text-4xl">No operation in progress.</h1>
+      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+        Command needs a live pathway to report on. Pick one to bring this terminal back online.
+      </p>
+
+      {isLoading ? (
+        <div className="mt-8">
+          <span className="label-mono flicker">Scanning available fronts…</span>
+        </div>
+      ) : error || !pathways ? (
+        <div className="mt-8">
+          <span className="label-mono text-threat">Failed to reach the pathway registry.</span>
+        </div>
+      ) : (
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          {pathways.map((p) => {
+            const Icon = p.icon;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => {
+                  setPathway(p);
+                  navigate("/");
+                }}
+                className="hud-panel corner-cut scanline group flex items-center gap-3 p-4 text-left transition-transform hover:scale-[1.01]"
+              >
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border-2 border-primary/60 bg-primary/10 text-primary">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-display text-base text-foreground">{p.title}</span>
+                  <span className="label-mono block truncate text-telemetry">{p.tagline}</span>
+                </span>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      <Link to="/pathways" className="label-mono mt-6 inline-flex items-center gap-2 text-primary hover:underline">
+        <Satellite className="h-3.5 w-3.5" />
+        View full pathway roster
+      </Link>
+    </div>
+  );
+}
+
 export default function CommandPage() {
-  const pathwayId = usePathwayStore((s) => s.selectedPathwayId)!;
+  const pathwayId = usePathwayStore((s) => s.selectedPathwayId);
   const pathwaySlug = usePathwayStore((s) => s.selectedPathwaySlug);
   const pathwayTitle = usePathwayStore((s) => s.selectedPathwayTitle);
   const flavor = (pathwaySlug ? PATHWAY_FLAVOR[pathwaySlug] : undefined) ?? { division: "Ops Division", node: "Node 07" };
-  const { data: me, isLoading: meLoading } = useQuery({ queryKey: ["me"], queryFn: fetchMe });
+  const { data: me, isLoading: meLoading } = useQuery({ queryKey: ["me"], queryFn: fetchMe, enabled: Boolean(pathwayId) });
   const {
     data: worlds,
     isLoading: worldsLoading,
     error,
-  } = useQuery({ queryKey: ["worlds", pathwayId], queryFn: () => fetchWorlds(pathwayId) });
+  } = useQuery({
+    queryKey: ["worlds", pathwayId],
+    queryFn: () => fetchWorlds(pathwayId!),
+    enabled: Boolean(pathwayId),
+  });
+
+  if (!pathwayId) {
+    return <NoPathwaySelected />;
+  }
 
   if (meLoading || worldsLoading) {
     return (
