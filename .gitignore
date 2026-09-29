@@ -16,7 +16,7 @@ build/
 coverage/
 .vscode/*
 !.vscode/extensions.json
-.claude/settings.local.json
+.claude/
 test-results/
 playwright-report/
 blob-report/
