@@ -8,6 +8,20 @@ lectures and taking quizzes.
 
 Full design and architecture reference: **[docs/](./docs/README.md)**.
 
+**Play it:** [breachsphire.yourwaytolearn.com](https://breachsphire.yourwaytolearn.com)
+
+| Command center | Pathway selection |
+| --- | --- |
+| ![Breachsphire command center](docs/screenshots/command.jpg) | ![Breachsphire pathways](docs/screenshots/pathways.jpg) |
+
+| Mission briefing | Mission challenge |
+| --- | --- |
+| ![Breachsphire mission briefing with mentor Ava](docs/screenshots/mission-briefing.jpg) | ![Breachsphire mission challenge](docs/screenshots/mission-challenge.jpg) |
+
+| Campaign missions | World map |
+| --- | --- |
+| ![Breachsphire campaign mission list](docs/screenshots/campaign.jpg) | ![Breachsphire world map](docs/screenshots/world-map.jpg) |
+
 ## Quickstart
 
 Needs a Supabase project for auth + the database. Two ways to get one:
