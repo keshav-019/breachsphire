@@ -1,10 +1,18 @@
 # Breachsphire
 
-A story-driven cybersecurity learning game. Players join a futuristic
-cybersecurity organization, get sent on missions, investigate incidents, and
-level up through 20 worlds — from absolute-beginner fundamentals to AI
-security — earning ranks, skills, and gear along the way instead of watching
-lectures and taking quizzes.
+A story-driven learning game for engineers. Players join Nexus, a futuristic
+operations organization, get sent on missions, investigate incidents, and earn
+clearance, XP and credits instead of watching lectures and taking quizzes.
+
+Five independent pathways, each a full campaign with its own Acts and missions:
+
+| Pathway | Track | Scope |
+| --- | --- | --- |
+| **Cyber Guardians** | Cybersecurity | 74 worlds across 11 Acts, from a first phishing recovery to containing an autonomous AI adversary |
+| **The Fracture** | Backend engineering | Building, securing, scaling and operating the systems a digital city depends on |
+| **Cipher Division** | AI / ML | From a first model to production AI: classical ML, deep learning, NLP, transformers, LLMs, RAG and agents |
+| **Vector Division** | Robotics, embedded & IoT | Electronics, firmware, RTOS, sensors, control, ROS 2, SLAM and safety-critical design |
+| **Atlas Division** | Cloud, DevOps & SRE | From one Linux host to multi-region infrastructure: Docker, Terraform, Kubernetes, observability, incident response, DR |
 
 Full design and architecture reference: **[docs/](./docs/README.md)**.
 
