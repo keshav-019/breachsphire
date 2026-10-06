@@ -1,0 +1,13 @@
+**/node_modules
+**/dist
+**/dist-desktop
+**/.turbo
+**/.env
+**/.env.*
+.git
+certs
+docs
+apps/web
+apps/desktop
+apps/admin
+infra

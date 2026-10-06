@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
 import type { ArenaSubmissionInput } from "@cyber-guardians/types";
-import { SupabaseAuthGuard } from "../auth/supabase-auth.guard";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { BackendExpansionService } from "./backend-expansion.service";
 
-@UseGuards(SupabaseAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller("backend")
 export class BackendExpansionController {
   constructor(private readonly service: BackendExpansionService) {}

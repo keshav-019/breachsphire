@@ -17,17 +17,9 @@ import type {
   SystemDesignChallengeDetail,
   SystemDesignChallengeSummary,
 } from "@cyber-guardians/types";
-import { supabase } from "./supabase";
+import { apiUrl } from "./api-base";
+import { getAccessToken, handleUnauthorized } from "./auth-client";
 import { ICON_MAP } from "./icon-map";
-
-const apiBase = (
-  import.meta.env.VITE_API_BASE_URL ||
-  (window.location.protocol === "file:" ? "https://breachsphire-api.onrender.com" : "/api")
-).replace(/\/$/, "");
-
-function apiUrl(path: string) {
-  return `${apiBase}${path.startsWith("/") ? path : `/${path}`}`;
-}
 
 export interface HealthStatus {
   status: "online" | "degraded" | "offline";
@@ -74,10 +66,20 @@ interface WorldDto {
   completion: number;
 }
 
-async function authHeaders(): Promise<HeadersInit> {
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
-  return token ? { Authorization: `Bearer ${token}` } : {};
+/**
+ * fetch() against the API with the session's bearer token. A 401 means the
+ * session is no longer valid, so it is cleared and RequireAuth sends the
+ * player back to the login page.
+ */
+async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const token = await getAccessToken();
+  const headers = new Headers(init.headers);
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  const res = await fetch(apiUrl(path), { ...init, headers });
+  if (res.status === 401 && token) {
+    handleUnauthorized();
+  }
+  return res;
 }
 
 async function responseError(res: Response): Promise<Error> {
@@ -115,7 +117,7 @@ interface PathwayDto {
 }
 
 export async function fetchPathways(): Promise<Pathway[]> {
-  const res = await fetch(apiUrl("/pathways"), { headers: await authHeaders() });
+  const res = await apiFetch("/pathways");
   if (!res.ok) {
     throw await responseError(res);
   }
@@ -127,9 +129,7 @@ export async function fetchPathways(): Promise<Pathway[]> {
 }
 
 export async function fetchWorlds(pathwayId: string): Promise<World[]> {
-  const res = await fetch(apiUrl(`/worlds?pathwayId=${encodeURIComponent(pathwayId)}`), {
-    headers: await authHeaders(),
-  });
+  const res = await apiFetch(`/worlds?pathwayId=${encodeURIComponent(pathwayId)}`);
   if (!res.ok) {
     throw await responseError(res);
   }
@@ -151,7 +151,7 @@ export async function fetchWorlds(pathwayId: string): Promise<World[]> {
 }
 
 async function getJson<T>(path: string): Promise<T> {
-  const res = await fetch(apiUrl(path), { headers: await authHeaders() });
+  const res = await apiFetch(path);
   if (!res.ok) {
     throw await responseError(res);
   }
@@ -159,9 +159,9 @@ async function getJson<T>(path: string): Promise<T> {
 }
 
 async function postJson<T>(path: string, body?: unknown): Promise<T> {
-  const res = await fetch(apiUrl(path), {
+  const res = await apiFetch(path, {
     method: "POST",
-    headers: { ...(await authHeaders()), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body ?? {}),
   });
   if (!res.ok) {

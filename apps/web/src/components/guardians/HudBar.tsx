@@ -21,7 +21,7 @@ export function HudBar() {
 
   const displayName: string =
     me?.displayName ??
-    (user?.user_metadata?.display_name as string | undefined) ??
+    user?.displayName ??
     user?.email?.split("@")[0] ??
     "Agent";
   const initials = displayName.slice(0, 2).toUpperCase();
