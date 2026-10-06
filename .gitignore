@@ -21,3 +21,6 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+# Postgres TLS material (includes the CA private key): never commit
+certs/
