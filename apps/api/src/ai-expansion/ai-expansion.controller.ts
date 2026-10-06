@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
-import { SupabaseAuthGuard } from "../auth/supabase-auth.guard";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { AiExpansionService } from "./ai-expansion.service";
 
-@UseGuards(SupabaseAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller("ai")
 export class AiExpansionController {
   constructor(private readonly service: AiExpansionService) {}

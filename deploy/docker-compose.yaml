@@ -1,0 +1,65 @@
+# Production stack on the VM (vanisher.projectyourown.com).
+#
+# Lives in deploy/ of the repo checkout at ~/breachsphire on the VM. The
+# CI/CD workflow (.github/workflows/deploy-api.yml) moves that checkout to
+# the commit being deployed and runs deploy/scripts/deploy.sh.
+#
+# Not in git (create on the VM): .env, certs/ (see README.md).
+
+# Pinned so the project (and its volume, breachsphire_pgdata18) keeps the
+# name it had before this file moved into deploy/.
+name: breachsphire
+
+services:
+  postgres:
+    build: .
+    image: postgres-ssl:18
+    container_name: pg
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "5432:5432"
+    volumes:
+      # Postgres 18 images store data under /var/lib/postgresql (not .../data)
+      - pgdata18:/var/lib/postgresql
+    shm_size: 256mb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # NestJS backend. CI builds the image, pushes it to
+  # ghcr.io/keshav-019/breachsphire-api:<commit>, and deploy.sh tags the
+  # deployed one as breachsphire-api:current (the previous one stays as
+  # breachsphire-api:previous for rollback). Never built or pulled here.
+  api:
+    image: breachsphire-api:current
+    pull_policy: never
+    container_name: api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: "3001"
+      # Talks to Postgres over the compose network by service name.
+      # "postgres" is in the server cert SAN, so verify-full works.
+      # The password comes from PGPASSWORD (postgres.js reads it), so it
+      # never needs URL-encoding.
+      DATABASE_URL: postgres://${POSTGRES_USER}@postgres:5432/${POSTGRES_USER}?sslmode=verify-full
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      NODE_EXTRA_CA_CERTS: /certs/ca.crt
+      # Signs access tokens; generated on the VM (openssl rand -hex 48).
+      # Changing it signs everyone out.
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      NODE_OPTIONS: --max-old-space-size=256
+    volumes:
+      - ./certs/ca.crt:/certs/ca.crt:ro
+    ports:
+      - "3001:3001"
+    mem_limit: 400m
+
+volumes:
+  pgdata18:

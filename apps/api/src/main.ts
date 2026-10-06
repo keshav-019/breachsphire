@@ -2,8 +2,10 @@ import "reflect-metadata";
 import "dotenv/config";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
+import { assertAuthConfigured } from "./auth/tokens";
 
 async function bootstrap() {
+  assertAuthConfigured();
   const app = await NestFactory.create(AppModule);
   app.enableCors();
   const port = process.env.PORT ? Number(process.env.PORT) : 3001;

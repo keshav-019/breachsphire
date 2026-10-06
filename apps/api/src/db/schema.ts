@@ -8,6 +8,7 @@ import {
   primaryKey,
   boolean,
   jsonb,
+  pgSchema,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -365,5 +366,36 @@ export const playerAiInterviewAttempts = pgTable("player_ai_interview_attempts",
   score: integer("score").notNull(),
   matchedSignals: jsonb("matched_signals").notNull(),
   feedback: jsonb("feedback").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Accounts live in the `auth` schema (originally Supabase Auth's tables,
+// now owned by the API). Only the columns the API reads or writes are
+// mapped; the rest are nullable or have defaults.
+const authSchema = pgSchema("auth");
+
+export const authUsers = authSchema.table("users", {
+  id: uuid("id").primaryKey(),
+  aud: text("aud"),
+  role: text("role"),
+  email: text("email"),
+  encryptedPassword: text("encrypted_password"),
+  emailConfirmedAt: timestamp("email_confirmed_at", { withTimezone: true }),
+  lastSignInAt: timestamp("last_sign_in_at", { withTimezone: true }),
+  rawAppMetaData: jsonb("raw_app_meta_data"),
+  rawUserMetaData: jsonb("raw_user_meta_data"),
+  createdAt: timestamp("created_at", { withTimezone: true }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+  bannedUntil: timestamp("banned_until", { withTimezone: true }),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
+});
+
+export const apiRefreshTokens = authSchema.table("api_refresh_tokens", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull(),
+  tokenHash: text("token_hash").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  replacedBy: uuid("replaced_by"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
