@@ -1,18 +1,17 @@
 # infra
 
-Deployment config: Cloudflare Pages (web), the API's container host, Supabase
-migrations, Cloudflare R2 buckets, and the dedicated Docker host for isolated
-labs (section 29).
+## migrations/
 
-## supabase/
+The database schema and game content as ordered SQL migrations
+(`<YYYYMMDDHHMMSS>_<name>.sql`). `deploy/scripts/migrate.sh` applies the ones
+not yet recorded in `migrations.schema_migrations`, each in its own
+transaction, as part of every deploy. Run against an empty PostgreSQL they
+build the complete database; `20260807000000_auth_baseline.sql` creates the
+`auth` schema (accounts, the `authenticated` role, `auth.uid()`) the rest
+build on.
 
-A local-first Supabase project (`supabase init`'d here, not at the repo
-root). `pnpm db:start` / `db:stop` / `db:status` (run from the repo root)
-drive it via the CLI's `--workdir infra` flag. `supabase/migrations/` holds
-the SQL migrations — currently just `profiles` (one row per `auth.users` row,
-auto-created via trigger on signup). Link this project to a hosted Supabase
-project when a real deployment target exists (`supabase link`); no code
-changes needed on the app side, just swapping the `.env` values.
+Add a change as a new file with a later timestamp. Never edit a migration that
+has already been applied: it will not run again.
 
-Everything else in this folder (Cloudflare Pages/Workers config, R2 buckets,
-the isolated-lab Docker host) is not implemented yet.
+The VM's Docker Compose stack and deploy scripts live in
+[`deploy/`](../deploy/README.md).

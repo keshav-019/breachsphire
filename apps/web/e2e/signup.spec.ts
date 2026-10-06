@@ -3,8 +3,8 @@ import { test, expect } from "@playwright/test";
 test.describe("signup", () => {
   test("creates a new account and lands on the HQ dashboard", async ({ page }) => {
     // Unique per run so this never collides with the persistent test user
-    // or with previous runs — signup is a real Supabase account creation,
-    // there's no fake/mock path for it.
+    // or with previous runs — signup creates a real account through the
+    // API, there's no fake/mock path for it.
     const unique = Date.now();
     const email = `e2e.signup.${unique}@cyberguardians.dev`;
     const displayName = `SIGNUP${unique}`.slice(0, 16);

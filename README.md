@@ -32,29 +32,35 @@ Full design and architecture reference: **[docs/](./docs/README.md)**.
 
 ## Quickstart
 
-Needs a Supabase project for auth + the database. Two ways to get one:
-
-- **Cloud (default, no Docker needed)** — create a free project at
-  [supabase.com](https://supabase.com), run the SQL in
-  `infra/supabase/migrations/` via its SQL Editor, then grab the Project URL /
-  anon key / JWT Secret from Project Settings → API.
-- **Local (needs Docker)** — `pnpm db:start` boots the same stack
-  (Postgres + Auth + Studio) via the Supabase CLI and applies the migration
-  automatically; `pnpm db:status` prints the same three values pointed at
-  `127.0.0.1`. Stop it with `pnpm db:stop`.
-
-Either way, copy `apps/web/.env.example` → `apps/web/.env` and
-`apps/api/.env.example` → `apps/api/.env`, fill in the values, then:
+Production runs on one VM (`vanisher.projectyourown.com`): PostgreSQL and the
+NestJS API (which also handles auth) in Docker Compose, deployed by GitHub
+Actions on every push to `main`. See [Deployment](./docs/13-deployment.md).
 
 ```bash
 pnpm install
-pnpm dev
 ```
+
+**Frontend only, against the VM's API** — put
+`VITE_API_BASE_URL=http://vanisher.projectyourown.com:3001` in
+`apps/web/.env`, then `pnpm dev:web` → http://localhost:5173.
+
+**Full stack locally** (needs Docker) — a throwaway Postgres built from the
+same migrations as production:
+
+```bash
+docker run -d --name breachsphire-dev -p 127.0.0.1:5432:5432 \
+  -e POSTGRES_USER=breachsphire -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=breachsphire postgres:18
+until docker exec breachsphire-dev pg_isready -q; do sleep 1; done
+PG_CONTAINER=breachsphire-dev DB_USER=breachsphire deploy/scripts/migrate.sh
+```
+
+Copy `apps/api/.env.example` → `apps/api/.env` with
+`DATABASE_URL=postgres://breachsphire:dev@localhost:5432/breachsphire` and a
+`JWT_SECRET`, leave `VITE_API_BASE_URL` empty (the Vite dev server proxies
+`/api` to the local API), then `pnpm dev`:
 
 - `apps/web` — http://localhost:5173
 - `apps/api` — http://localhost:3001 (`/health`)
-
-Or run one side at a time: `pnpm dev:web` / `pnpm dev:api`.
 
 ### Desktop
 
@@ -64,23 +70,24 @@ pnpm build:desktop    # unpacked app in apps/desktop/dist/win-unpacked
 pnpm dist:desktop     # Windows installer in apps/desktop/dist
 ```
 
-The packaged app uses the same Supabase account and deployed API as the web
+The packaged app uses the same accounts and the same API on the VM as the web
 application, so progress remains synchronized. See
 [Forge Lab & desktop architecture](./docs/14-backend-forge-lab.md).
 
 ## Current implementation
 
 The authenticated Cybersecurity and 32-Act Backend Engineering pathways are
-implemented against Supabase/PostgreSQL. Forge Lab adds 12 system-design
+implemented against the API and PostgreSQL. Forge Lab adds 12 system-design
 briefs, five portfolio campaigns, and Java/Spring, Python/FastAPI, and Go
 specializations with persisted progress. The Electron shell packages the same
 experience for Windows.
 
 ## Testing
 
-`apps/web` has a Playwright e2e suite that runs against the real dev servers
-and the real Supabase project (no mocks) — auth (login/logout/session
-persistence/protected routes), signup, and the World Map's live data.
+`apps/web` has a Playwright e2e suite that runs against the real dev servers,
+API and database (no mocks) — auth (login/logout/session persistence/protected
+routes), signup, and the World Map's live data. Point it at the local stack:
+signup creates real accounts in whichever database the API uses.
 
 It logs in as a **persistent test account** rather than creating a throwaway
 user per run: copy `apps/web/.env.test.example` to `apps/web/.env.test` and
@@ -108,7 +115,9 @@ signing, and a hosted desktop-download surface. See
 ```
 apps/       web (player frontend) · api (NestJS backend) · admin (Mission Builder, placeholder)
 packages/   types (shared schema) · ui · game-engine · mission-engine · config · labs (placeholders)
-infra/      infra/supabase (local Supabase project + migrations) · deployment config (placeholder)
+infra/      migrations (database schema + game content)
+deploy/     VM Docker Compose stack + deploy scripts
+.github/    CI/CD (typecheck, image build, deploy to the VM)
 docs/       design & architecture wiki
 ```
 

@@ -2,7 +2,7 @@ import { apiUrl } from "./api-base";
 
 /**
  * Session handling against the API's /auth endpoints. The session lives in
- * localStorage (as supabase-js kept it before), is shared across tabs via
+ * localStorage, is shared across tabs via
  * the storage event, and the access token is refreshed shortly before it
  * expires.
  */

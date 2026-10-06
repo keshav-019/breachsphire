@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { expect, test } from "@playwright/test";
 
-const migrationsDirectory = path.resolve(import.meta.dirname, "../../../infra/supabase/migrations");
+const migrationsDirectory = path.resolve(import.meta.dirname, "../../../infra/migrations");
 const migrationSql = fs
   .readdirSync(migrationsDirectory)
   .filter((fileName) => fileName.endsWith(".sql"))

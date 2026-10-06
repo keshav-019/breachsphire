@@ -42,7 +42,7 @@ independently enrollable and end in a deployable capstone.
 
 ## Implementation boundaries
 
-- Migration: `infra/supabase/migrations/20260811010000_backend_expansion_systems.sql`
+- Migration: `infra/migrations/20260811010000_backend_expansion_systems.sql`
 - API module: `apps/api/src/backend-expansion/`
 - Web routes: `/forge`, `/forge/arena`, `/forge/portfolio`, `/forge/tracks`
 - Shared contracts: `packages/types/src/backend-expansion.ts`

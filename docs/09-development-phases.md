@@ -68,12 +68,12 @@ Phase 1 has a working slice: the monorepo, `packages/types`, `apps/web` (the
 full HQ/World Map/Mission/Profile/Leaderboard/Achievements UI, reachable in a
 browser), and `apps/api` (health endpoint the web app polls live).
 
-Authentication is real, not mocked: local Supabase (Postgres + Auth) runs via
-`pnpm db:start` (see [Architecture & Tech Stack](./06-architecture-tech-stack.md)).
-Sign up / log in / log out work end-to-end, sessions persist across reloads,
-game routes are protected client-side, and `apps/api` has a
-`SupabaseAuthGuard` that verifies sessions server-side (`GET /players/me`). A
-`public.profiles` row is auto-created per signup via a Postgres trigger.
+Authentication is real, not mocked, and built into the API (see
+[Architecture & Tech Stack](./06-architecture-tech-stack.md)). Sign up / log
+in / log out work end-to-end, sessions persist across reloads and refresh
+themselves, game routes are protected client-side, and `apps/api`'s
+`JwtAuthGuard` verifies sessions server-side. A `public.profiles` row is
+auto-created per signup via a Postgres trigger.
 
 Still mocked: XP, rank, skills, missions, worlds, leaderboard, achievements —
 the Dossier/Profile page reads real identity but fabricated stats. Wiring

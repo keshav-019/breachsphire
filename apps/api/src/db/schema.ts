@@ -12,7 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 /**
- * Mirrors infra/supabase/migrations/*.sql by hand — Drizzle is a typed
+ * Mirrors infra/migrations/*.sql by hand — Drizzle is a typed
  * query layer here, not the migration source of truth.
  */
 
@@ -369,9 +369,9 @@ export const playerAiInterviewAttempts = pgTable("player_ai_interview_attempts",
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-// Accounts live in the `auth` schema (originally Supabase Auth's tables,
-// now owned by the API). Only the columns the API reads or writes are
-// mapped; the rest are nullable or have defaults.
+// Accounts live in the `auth` schema (see
+// infra/migrations/20260807000000_auth_baseline.sql). Only the columns the
+// API reads or writes are mapped; the rest are nullable or have defaults.
 const authSchema = pgSchema("auth");
 
 export const authUsers = authSchema.table("users", {

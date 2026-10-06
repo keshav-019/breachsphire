@@ -1,8 +1,8 @@
--- Self-hosted auth: the API now issues its own sessions instead of Supabase
--- Auth. auth.users stays the account table (existing bcrypt hashes keep
--- working, and every player_* foreign key plus the on_auth_user_created
--- profile trigger still point at it). This table holds the API's refresh
--- tokens; only a SHA-256 hash of each token is stored.
+-- Self-hosted auth: the API issues its own sessions. auth.users stays the
+-- account table (existing bcrypt hashes keep working, and every player_*
+-- foreign key plus the on_auth_user_created profile trigger still point at
+-- it). This table holds the API's refresh tokens; only a SHA-256 hash of
+-- each token is stored.
 create table if not exists auth.api_refresh_tokens (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,

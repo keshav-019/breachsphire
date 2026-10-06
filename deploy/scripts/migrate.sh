@@ -1,23 +1,36 @@
 #!/usr/bin/env bash
-# Applies every migration in infra/supabase/migrations that is not yet
-# recorded in supabase_migrations.schema_migrations, oldest first. Each file
-# runs in its own transaction together with its bookkeeping row, so a
-# failing migration leaves nothing behind and stops the deploy.
+# Applies every migration in infra/migrations that is not yet recorded in
+# migrations.schema_migrations, oldest first. Each file runs in its own
+# transaction together with its bookkeeping row, so a failing migration
+# leaves nothing behind and stops the deploy.
 #
 # Usage: deploy/scripts/migrate.sh [--dry-run]
+#   PG_CONTAINER (default: pg), DB_USER (default: POSTGRES_USER from
+#   deploy/.env) and DB_NAME (default: DB_USER) select the database.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-MIGRATIONS_DIR="${MIGRATIONS_DIR:-../infra/supabase/migrations}"
+MIGRATIONS_DIR="${MIGRATIONS_DIR:-../infra/migrations}"
+PG_CONTAINER="${PG_CONTAINER:-pg}"
 dry_run=false
 [[ "${1:-}" == "--dry-run" ]] && dry_run=true
 
-db_user=$(grep -E '^POSTGRES_USER=' .env | cut -d= -f2-)
+db_user="${DB_USER:-$(grep -E '^POSTGRES_USER=' .env | cut -d= -f2-)}"
+db_name="${DB_NAME:-$db_user}"
 psql_db() {
-  docker exec -i pg psql -U "$db_user" -d "$db_user" -v ON_ERROR_STOP=1 -q "$@"
+  docker exec -i -e PGOPTIONS="-c client_min_messages=warning" "$PG_CONTAINER" psql -U "$db_user" -d "$db_name" -v ON_ERROR_STOP=1 -q "$@"
 }
 
-applied=$(psql_db -Atc "select version from supabase_migrations.schema_migrations")
+psql_db <<'SQL'
+create schema if not exists migrations;
+create table if not exists migrations.schema_migrations (
+  version text primary key,
+  name text,
+  statements text[]
+);
+SQL
+
+applied=$(psql_db -Atc "select version from migrations.schema_migrations")
 
 pending=0
 for file in $(find "$MIGRATIONS_DIR" -maxdepth 1 -name '*.sql' | sort); do
@@ -39,7 +52,7 @@ for file in $(find "$MIGRATIONS_DIR" -maxdepth 1 -name '*.sql' | sort); do
     echo "begin;"
     cat "$file"
     echo
-    printf "insert into supabase_migrations.schema_migrations (version, name) values ('%s', '%s');\n" "$version" "$name"
+    printf "insert into migrations.schema_migrations (version, name) values ('%s', '%s');\n" "$version" "$name"
     echo "commit;"
   } | psql_db
 done

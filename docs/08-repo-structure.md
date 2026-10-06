@@ -14,7 +14,9 @@ packages/
   mission-engine  Runtime that interprets mission data into objective/challenge flow (placeholder)
   config          Shared lint/TS/Tailwind presets (placeholder)
   labs            Lab orchestration client for the Labs API module (placeholder — Phase 7)
-infra/           Deployment config: Cloudflare Pages/Workers, Supabase migrations, R2, Docker host
+infra/           Database migrations (infra/migrations)
+deploy/          VM Docker Compose stack + deploy scripts (see deploy/README.md)
+.github/         CI/CD: typecheck, image build, deploy to the VM
 docs/            This wiki
 ```
 
