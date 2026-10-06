@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { AuthModule } from "./auth/auth.module";
 import { HealthModule } from "./health/health.module";
 import { PlayersModule } from "./players/players.module";
 import { PathwaysModule } from "./pathways/pathways.module";
@@ -14,6 +15,6 @@ import { AiExpansionModule } from "./ai-expansion/ai-expansion.module";
  * Notifications, Admin, Analytics.
  */
 @Module({
-  imports: [HealthModule, PlayersModule, PathwaysModule, WorldsModule, MissionsModule, BackendExpansionModule, AiExpansionModule],
+  imports: [AuthModule, HealthModule, PlayersModule, PathwaysModule, WorldsModule, MissionsModule, BackendExpansionModule, AiExpansionModule],
 })
 export class AppModule {}

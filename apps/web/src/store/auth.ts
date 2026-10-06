@@ -1,13 +1,13 @@
 import { create } from "zustand";
-import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
+import * as authClient from "@/lib/auth-client";
+import type { AuthUser, Session } from "@/lib/auth-client";
 
 export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 
 interface AuthState {
   status: AuthStatus;
   session: Session | null;
-  user: User | null;
+  user: AuthUser | null;
   error: string | null;
   init: () => void;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
@@ -21,6 +21,18 @@ interface AuthState {
 
 let initialized = false;
 
+function fromSession(session: Session | null) {
+  return {
+    session,
+    user: session?.user ?? null,
+    status: (session ? "authenticated" : "unauthenticated") as AuthStatus,
+  };
+}
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Could not reach the sign-in service";
+}
+
 export const useAuthStore = create<AuthState>((set) => ({
   status: "loading",
   session: null,
@@ -31,40 +43,33 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (initialized) return;
     initialized = true;
 
-    supabase.auth.getSession().then(({ data }) => {
-      set({
-        session: data.session,
-        user: data.session?.user ?? null,
-        status: data.session ? "authenticated" : "unauthenticated",
-      });
-    });
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      set({
-        session,
-        user: session?.user ?? null,
-        status: session ? "authenticated" : "unauthenticated",
-      });
-    });
+    set(fromSession(authClient.getSession()));
+    authClient.onSessionChange((session) => set(fromSession(session)));
   },
 
   signIn: async (email, password) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) set({ error: error.message });
-    return { error: error?.message ?? null };
+    try {
+      await authClient.signIn(email, password);
+      set({ error: null });
+      return { error: null };
+    } catch (error) {
+      set({ error: errorMessage(error) });
+      return { error: errorMessage(error) };
+    }
   },
 
   signUp: async (email, password, displayName) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { display_name: displayName } },
-    });
-    if (error) set({ error: error.message });
-    return { error: error?.message ?? null };
+    try {
+      await authClient.signUp(email, password, displayName);
+      set({ error: null });
+      return { error: null };
+    } catch (error) {
+      set({ error: errorMessage(error) });
+      return { error: errorMessage(error) };
+    }
   },
 
   signOut: async () => {
-    await supabase.auth.signOut();
+    await authClient.signOut();
   },
 }));
