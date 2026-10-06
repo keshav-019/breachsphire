@@ -1,0 +1,11 @@
+# Build context for the Postgres image is deploy/. Keep secrets and
+# everything the image doesn't need out of it.
+.env
+.env.*
+certs/ca.key
+certs/ca.srl
+certs/*.csr
+certs/*.ext
+scripts/
+*.sh
+*.md
